@@ -1,0 +1,40 @@
+/* 全局滚动条样式 */
+* {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(217, 217, 227, 0.4) transparent; /* Firefox */
+}
+
+/* Webkit browsers (Chrome, Safari, etc) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(217, 217, 227, 0.4);
+  border-radius: 10px;
+  border: 2px solid transparent;
+}
+
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+  background-color: rgba(217, 217, 227, 0.8);
+}
+
+/* 暗色模式 */
+.dark * {
+  scrollbar-color: rgba(86, 88, 105, 0.4) transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(86, 88, 105, 0.4);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+.dark ::-webkit-scrollbar-thumb:active {
+  background-color: rgba(86, 88, 105, 0.8);
+}
