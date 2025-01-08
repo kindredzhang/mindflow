@@ -11,13 +11,16 @@ interface ApiConfig {
 
 // 根据环境获取配置
 const getConfig = (): ApiConfig => {
+  const isDev = import.meta.env.DEV;
+  
   return {
-    baseURL: '/api',
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     timeout: 120000,
     withCredentials: true,
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'Origin': isDev ? 'http://localhost:5173' : 'https://ai.view.magictea.fun',
     },
   };
 };
@@ -64,7 +67,7 @@ class ApiService {
           '/common/department/list'
         ];
         const isNoTokenPath = noTokenPaths.some(path => config.url?.includes(path));
-    
+        
         if (!isNoTokenPath) {
           const token = localStorage.getItem('access_token');
           if (!token) {
