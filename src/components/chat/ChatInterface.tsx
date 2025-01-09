@@ -19,9 +19,10 @@ import type { Message } from '@/types';
 import { MessageSquare, Upload } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { LoadingSpinner } from '../common/LoadingSpinner';
 import { WelcomeScreen } from './WelcomeScreen';
+import WelcomeChatScreen from './welcome/WelcomeChatScreeen';
 
 interface SendMessageRequest {
   question: string;
@@ -46,6 +47,7 @@ interface Workspace {
 
 export default function ChatInterface() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
@@ -100,6 +102,16 @@ export default function ChatInterface() {
       setIsFirstMessage(messages.length === 0);
     }
   }, [selectedSessionId, messages.length]);
+
+  useEffect(() => {
+    if (location.state?.clearSession) {
+      setSelectedSessionId(null);
+      navigate('/chat', { 
+        replace: true,
+        state: {} 
+      });
+    }
+  }, [location.state, navigate]);
 
   const handleNewChat = () => {
     setIsNewWorkspaceDialogOpen(true);
@@ -379,12 +391,12 @@ export default function ChatInterface() {
                     className="w-full flex items-center justify-center space-x-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-md"
                   >
                     <MessageSquare size={16} />
-                    <span>新工作区</span>
+                    <span>新建工作区</span>
                   </button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>新工作区</DialogTitle>
+                    <DialogTitle>新建工作区</DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleCreateWorkspace} className="space-y-4">
                     <div className="space-y-2">
@@ -454,19 +466,23 @@ export default function ChatInterface() {
                 <div className="flex flex-col items-center justify-center h-full space-y-4">
                   <LoadingSpinner text="加载聊天记录中..." />
                 </div>
-              ) : messages.length === 0 ? (
-                <WelcomeScreen />
+              ) : selectedSessionId ? (
+                messages.length === 0 ? (
+                  <WelcomeChatScreen />
+                ) : (
+                  messages.map((message) => (
+                    <ChatMessage
+                      key={message.id}
+                      message={message}
+                      onCopy={handleCopyContent}
+                      onSpeak={handleSpeakContent}
+                      onDelete={handleDeleteMessage}
+                      onQuote={handleQuote}
+                    />
+                  ))
+                )
               ) : (
-                messages.map((message) => (
-                  <ChatMessage
-                    key={message.id}
-                    message={message}
-                    onCopy={handleCopyContent}
-                    onSpeak={handleSpeakContent}
-                    onDelete={handleDeleteMessage}
-                    onQuote={handleQuote}
-                  />
-                ))
+                <WelcomeScreen />
               )}
             </div>
           </div>

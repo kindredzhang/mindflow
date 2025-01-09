@@ -6,13 +6,19 @@ export default function Navigation() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const handleLogoClick = () => {
+    navigate('/chat', { 
+      state: { clearSession: true } 
+    });
+  };
+
   return (
     <div className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50 border-b border-border">
       <div className="flex h-16 items-center justify-between px-6">
         <div className="flex items-center space-x-8">
           <h1 
             className="text-foreground font-bold text-xl flex items-center cursor-pointer group" 
-            onClick={() => navigate('/chat')}
+            onClick={handleLogoClick}
           >
             <img 
               src="/logo.svg" 
@@ -49,7 +55,7 @@ export default function Navigation() {
               }`}
             >
               <Database size={16} className="mr-2" />
-              <span>知识库</span>
+              <span>Knowledge</span>
             </button>
           </nav>
         </div>

@@ -15,7 +15,7 @@ export function WorkspaceHeader({ onNewWorkspace }: WorkspaceHeaderProps) {
         className="w-full flex items-center justify-center space-x-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-md"
       >
         <MessageSquare size={16} />
-        <span>新工作区</span>
+        <span>新建工作区</span>
       </button>
 
       <button

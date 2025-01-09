@@ -180,9 +180,10 @@ export function ChatInput({
                   }
                 }}
                 placeholder={isSending ? "AI 正在回复中..." : "发送消息..."}
-                className="flex-1 min-h-[48px] h-[48px] max-h-[220px] px-3 py-2 
-                          bg-transparent text-foreground placeholder:text-muted-foreground 
-                          focus:outline-none resize-none overflow-x-hidden"
+                className="flex-1 min-h-[48px] h-[48px] max-h-[220px] px-3 
+                           bg-transparent text-foreground placeholder:text-muted-foreground 
+                           focus:outline-none resize-none overflow-x-hidden
+                           leading-[48px] py-0"
                 disabled={isSending}
               />
               <div className="flex items-center gap-1 pr-2">
