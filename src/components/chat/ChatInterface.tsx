@@ -62,6 +62,7 @@ export default function ChatInterface() {
     content: string;
   } | null>(null);
   const [loadingRecentFiles, setLoadingRecentFiles] = useState(true);
+  const [isFirstMessage, setIsFirstMessage] = useState(true);
 
   const fetchWorkspaces = async () => {
     try {
@@ -93,6 +94,12 @@ export default function ChatInterface() {
 
     fetchRecentFiles();
   }, []);
+
+  useEffect(() => {
+    if (selectedSessionId) {
+      setIsFirstMessage(messages.length === 0);
+    }
+  }, [selectedSessionId, messages.length]);
 
   const handleNewChat = () => {
     setIsNewWorkspaceDialogOpen(true);
@@ -157,71 +164,75 @@ export default function ChatInterface() {
       
       const reader = await chatApi.sendMessage(messageData);
       let fullResponse = '';
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (!line.trim() || line === '[RESPONSE_COMPLETE]' || line === '[SAVE_COMPLETE]') {
-            continue;
-          }
-
-          try {
-            const data = JSON.parse(line);
+      let currentSessionName = '';
+      
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const lines = new TextDecoder().decode(value).split('\n');
+          for (const line of lines) {
+            if (!line.trim()) continue;
             
-            switch (data.type) {
-              case 'error':
-                toast.error(data.message || data.data?.message);
-                break;
+            try {
+              const data = JSON.parse(line);
+              
+              switch (data.type) {
+                case 'error':
+                  toast.error(data.message || data.data?.message);
+                  break;
 
-              case 'metadata':
-                if (data.data?.file_metadata) {
-                  setMessages(prev => prev.map((msg, index) => {
-                    if (index === prev.length - 1) {
-                      return {
-                        ...msg,
-                        relatedFiles: data.data.file_metadata
-                      };
-                    }
-                    return msg;
-                  }));
-                }
-                break;
+                case 'metadata':
+                  if (data.data?.file_metadata) {
+                    setMessages(prev => prev.map((msg, index) => {
+                      if (index === prev.length - 1) {
+                        return {
+                          ...msg,
+                          relatedFiles: data.data.file_metadata
+                        };
+                      }
+                      return msg;
+                    }));
+                  }
+                  break;
                   
-              case 'chunk':
-                if (data.data?.content) {
-                  fullResponse += data.data.content;
-                  setMessages(prev => prev.map((msg, index) => {
-                    if (index === prev.length - 1) {
-                      return { ...msg, content: fullResponse };
-                    }
-                    return msg;
-                  }));
-                }
-                break;
+                case 'chunk':
+                  if (data.data?.content) {
+                    fullResponse += data.data.content;
+                    setMessages(prev => prev.map((msg, index) => {
+                      if (index === prev.length - 1) {
+                        return { ...msg, content: fullResponse };
+                      }
+                      return msg;
+                    }));
 
-              case 'complete':
-                console.log('Chat saved:', data.data?.message);
-                break;
+                    if (isFirstMessage && selectedSessionId) {
+                      const newName = input.slice(0, 15) + (input.length > 15 ? '...' : '');
+                      if (newName !== currentSessionName) {
+                        currentSessionName = newName;
+                        await chatApi.renameSession(selectedSessionId, newName);
+                        await fetchWorkspaces();
+                      }
+                    }
+                  }
+                  break;
+
+                case 'complete':
+                  console.log('Chat saved:', data.data?.message);
+                  break;
                   
-              default:
-                console.warn('Unknown message type:', data.type);
+                default:
+                  console.warn('Unknown message type:', data.type);
+              }
+            } catch (parseError) {
+              console.error('Failed to parse server message:', line, parseError);
             }
-          } catch (parseError) {
-            console.error('Failed to parse server message:', line, parseError);
           }
         }
       }
       
-      if (selectedSessionId) {
-        await chatApi.renameSession(selectedSessionId, '');
-      }
-      
+      setIsFirstMessage(false);
       setSelectedFile(null);
       setQuotedMessage(null);
       

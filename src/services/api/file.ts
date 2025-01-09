@@ -1,5 +1,5 @@
 import { apiService } from "@/services/api/axios";
-import { handleRequest } from '@/utils/request';
+import { showToast } from '@/store/toast';
 
 export interface FileUploadHistory {
   id: string | number;
@@ -31,91 +31,148 @@ export const fileApi = {
 
   // 获取最近上传的文件列表
   fileUploadHistory: async () => {
-    return handleRequest(
-      () => apiService.get<FileUploadHistory[]>('/common/file/upload/history'),
-      {
-        showSuccessToast: false, // 查询类接口通常不需要成功提示
-        errorMessage: '获取文件列表失败'
-      }
-    );
+    try {
+      const response = await apiService.get<FileUploadHistory[]>('/common/file/upload/history');
+      return response;
+    } catch (error) {
+      showToast({
+        title: "获取失败",
+        description: error instanceof Error ? error.message : '获取文件列表失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
   // 工作区文件夹文件树结构
   folderFileList: async (workspaceId: string) => {
-    return handleRequest(
-      () => apiService.get<FileTree[]>(`/folder/file/list`, {
+    try {
+      const response = await apiService.get<FileTree[]>(`/folder/file/list`, {
         params: { workspace_id: workspaceId }
-      }),
-      {
-        showSuccessToast: false,
-        errorMessage: '获取文件树失败'
-      }
-    );
+      });
+      return response;
+    } catch (error) {
+      showToast({
+        title: "获取失败",
+        description: error instanceof Error ? error.message : '获取文件树失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
   // 创建文件夹
   createFolder: async (folderName: string) => {
-    return handleRequest(
-      () => apiService.post<void>('/create/folder', { name: folderName }),
-      {
-        successMessage: '文件夹创建成功',
-        errorMessage: '创建文件夹失败'
-      }
-    );
+    try {
+      const response = await apiService.post<void>('/create/folder', { name: folderName });
+      showToast({
+        title: "创建成功",
+        description: "文件夹创建成功",
+        variant: "default",
+      });
+      return response;
+    } catch (error) {
+      showToast({
+        title: "创建失败",
+        description: error instanceof Error ? error.message : '创建文件夹失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
   // 上传文件前检测
   uploadFileCheck: async (fileName: string, departmentId: string = '0') => {
-    const response = await handleRequest(
-      () => apiService.post<number>('/upload/check', {
-        file_name: fileName,
-        department_id: departmentId
-      }),
-      {
-        showSuccessToast: false,
-        errorMessage: '文件上传前检测失败'
-      }
-    );
-    console.log('uploadFileCheck response:', response);
-    return response;
+    return await apiService.post<number>('/upload/check', {
+      file_name: fileName,
+      department_id: departmentId
+    });
   },
 
   // 上传文件
   uploadFile: async (formData: FormData, departmentId: string = '0') => {
-    formData.append('department_id', departmentId);
-    return handleRequest(
-      () => apiService.post('/upload', formData),
-      {
-        successMessage: '文件上传成功',
-        errorMessage: '文件上传失败'
-      }
-    );
+    try {
+      formData.append('department_id', departmentId);
+      const response = await apiService.post('/upload', formData);
+      showToast({
+        title: "上传成功",
+        description: "文件上传成功",
+        variant: "default",
+      });
+      return response;
+    } catch (error) {
+      showToast({
+        title: "上传失败",
+        description: error instanceof Error ? error.message : '文件上传失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
   // 将文件转换为向量 - 支持批量
   fileToEmbed: async (fileIds: string[], workspaceId: string) => {
-    return handleRequest(
-      () => apiService.post('/file/to/embed', {
+    try {
+      const response = await apiService.post('/file/to/embed', {
         file_ids: fileIds,
         workspace_id: workspaceId
-      }),
-      {
-        successMessage: '文件向量化处理成功',
-        errorMessage: '文件向量化处理失败'
-      }
-    );
+      });
+      showToast({
+        title: "处理成功",
+        description: "文件向量化处理成功",
+        variant: "default",
+      });
+      return response;
+    } catch (error) {
+      showToast({
+        title: "处理失败",
+        description: error instanceof Error ? error.message : '文件向量化处理失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
   // 添加从工作区移除文件的方法
   removeFileFromWorkspace: async (workspaceId: string, fileId: string) => {
-    return await apiService.post('/file/remove/embed', {
-      file_ids: [fileId],
-      workspace_id: workspaceId
-    });
+    try {
+      const response = await apiService.post('/file/remove/embed', {
+        file_ids: [fileId],
+        workspace_id: workspaceId
+      });
+      showToast({
+        title: "移除成功",
+        description: "文件已从工作区移除",
+        variant: "default",
+      });
+      return response;
+    } catch (error) {
+      showToast({
+        title: "移除失败",
+        description: error instanceof Error ? error.message : '从工作区移除文件失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
-  deleteFile: (fileId: string) => {
-    return apiService.post('/file/delete', { file_id: fileId });
+  deleteFile: async (fileId: string) => {
+    try {
+      const response = await apiService.post('/file/delete', { file_id: fileId });
+      showToast({
+        title: "删除成功",
+        description: "文件已删除",
+        variant: "default",
+      });
+      return response;
+    } catch (error) {
+      showToast({
+        title: "删除失败",
+        description: error instanceof Error ? error.message : '删除文件失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
 };

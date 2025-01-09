@@ -1,1 +1,0 @@
-// 这个文件可以删除，直接使用 src/store/toast.ts 中的 showToast

@@ -85,6 +85,7 @@ class ApiService {
     this.api.interceptors.response.use(
       (response) => {
         const res = response.data as StandardResponse;
+        const config = response.config;
         
         // 处理401登录过期的情况
         if (res.code === 401) {
@@ -92,12 +93,15 @@ class ApiService {
           localStorage.removeItem('access_token');
           localStorage.removeItem('user');
           
-          // 显示提示
-          showToast({
-            title: "登录已过期",
-            description: "请重新登录",
-            variant: "destructive"
-          });
+          try {
+            showToast({
+              title: "登录已过期",
+              description: "请重新登录",
+              variant: "destructive"
+            });
+          } catch (error) {
+            console.error('Failed to show toast:', error);
+          }
           
           // 跳转到登录页
           window.location.href = '/login';
@@ -106,48 +110,53 @@ class ApiService {
         
         // 处理其他非200的情况
         if (res.code !== 200) {
-          showToast({
-            title: "错误",
-            description: res.message,
-            variant: "destructive"
-          });
+          // 如果设置了customError，不显示默认错误提示
+          if (!config.customError) {
+            showToast({
+              title: "错误",
+              description: res.message,
+              variant: "destructive"
+            });
+          }
           
           return Promise.reject(new Error(res.message));
         }
         
-        // 成功时不显示后端返回的消息，返回数据
         return {
           ...response,
           data: res.data
         };
       },
       (error) => {
-        let message = '请求失败';
-        
-        if (error.response) {
-          // 处理401错误
-          if (error.response.status === 401) {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('user');
-            window.location.href = '/login';
-            message = '登录已过期,请重新登录';
+        // 如果设置了customError，不显示默认错误提示
+        if (!error.config?.customError) {
+          let message = '请求失败';
+          
+          if (error.response) {
+            // 处理401错误
+            if (error.response.status === 401) {
+              localStorage.removeItem('access_token');
+              localStorage.removeItem('user');
+              window.location.href = '/login';
+              message = '登录已过期,请重新登录';
+            } else {
+              // 显示后端返回的错误消息
+              message = error.response.data?.message || '服务器错误';
+            }
+          } else if (error.request) {
+            message = '无法连接到服务器';
           } else {
-            // 显示后端返回的错误消息
-            message = error.response.data?.message || '服务器错误';
+            message = error.message || '请求配置错误';
           }
-        } else if (error.request) {
-          message = '无法连接到服务器';
-        } else {
-          message = error.message || '请求配置错误';
+
+          showToast({
+            title: "错误",
+            description: message,
+            variant: "destructive"
+          });
         }
 
-        showToast({
-          title: "错误",
-          description: message,
-          variant: "destructive"
-        });
-
-        return Promise.reject(new Error(message));
+        return Promise.reject(error);
       }
     );
   }
@@ -165,10 +174,15 @@ class ApiService {
     
     // 只有在配置了自定义成功消息时才显示提示
     if (config.successMessage && !config.silent) {
-      showToast({
-        title: "成功",
-        description: config.successMessage
-      });
+      try {
+        showToast({
+          title: "成功",
+          description: config.successMessage,
+          variant: "default"
+        });
+      } catch (error) {
+        console.error('Failed to show toast:', error);
+      }
     }
     
     return response.data;
@@ -200,7 +214,8 @@ declare module 'axios' {
   interface AxiosRequestConfig {
     successMessage?: string;
     errorMessage?: string;
-    silent?: boolean; // 是否静默请求，不显示任何提示
+    silent?: boolean;  // 完全禁用提示
+    customError?: boolean;  // 使用自定义错误处理
   }
 }
 

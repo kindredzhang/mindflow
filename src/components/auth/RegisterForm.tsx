@@ -74,17 +74,8 @@ export default function RegisterForm() {
     try {
       await authApi.sendVerificationCode(email);
       setCountdown(60);
-      showToast({
-        title: "验证码已发送",
-        description: "请查看邮箱获取验证码",
-        variant: "default",
-      });
     } catch (error) {
-      showToast({
-        title: "发送失败",
-        description: error instanceof Error ? error.message : '发送验证码失败',
-        variant: "destructive",
-      });
+      console.log(error);
     }
   };
 
@@ -107,20 +98,11 @@ export default function RegisterForm() {
         department_id: parseInt(departmentId),
         name,
       });
-      showToast({
-        title: "注册成功",
-        description: "即将跳转到登录页面...",
-        variant: "default",
-      });
       setTimeout(() => {
         navigate('/login');
       }, 1500);
     } catch (error) {
-      showToast({
-        title: "注册失败",
-        description: error instanceof Error ? error.message : '注册失败',
-        variant: "destructive",
-      })
+      console.log(error);
     }
   };
 
@@ -142,6 +124,7 @@ export default function RegisterForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-3/4"
                   required
+                  autoComplete="new-password"
                 />
                 <Button
                   type="button"
@@ -205,6 +188,7 @@ export default function RegisterForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="new-password"
               />
             </div>
 

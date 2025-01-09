@@ -1,4 +1,5 @@
 import { apiService } from "@/services/api/axios";
+import { showToast } from '@/store/toast';
 import { Message } from "@/types";
 import { handleRequest } from '@/utils/request';
 
@@ -31,16 +32,32 @@ export interface SendMessageRequest {
 export const chatApi = {
   // 获取工作区列表
   getWorkspaceSessions: async () => {
-    return apiService.get<Workspace[]>('/workspace/list', {
-      errorMessage: '获取工作区列表失败'
-    });
+    try {
+      const response = await apiService.get<Workspace[]>('/workspace/list');
+      return response;
+    } catch (error) {
+      showToast({
+        title: "获取失败",
+        description: error instanceof Error ? error.message : '获取工作区列表失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
   // 获取会话消息
   getChatHistory: async (sessionId: string) => {
-    return apiService.get<Message[]>(`/chat/history/${sessionId}`, {
-      errorMessage: '获取聊天记录失败'
-    });
+    try {
+      const response = await apiService.get<Message[]>(`/chat/history/${sessionId}`);
+      return response;
+    } catch (error) {
+      showToast({
+        title: "获取失败",
+        description: error instanceof Error ? error.message : '获取聊天记录失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
   // 发送消息
@@ -77,67 +94,158 @@ export const chatApi = {
   },
 
   removeMessage: async (messageId: string) => {
-    return apiService.post('/chat/remove', { message_id: messageId }, {
-      successMessage: '消息已删除',
-      errorMessage: '删除消息失败'
-    });
+    try {
+      const response = await apiService.post('/chat/remove', { message_id: messageId });
+      showToast({
+        title: "删除成功",
+        description: "消息已删除",
+        variant: "default",
+      });
+      return response;
+    } catch (error) {
+      showToast({
+        title: "删除失败",
+        description: error instanceof Error ? error.message : '删除消息失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
   // 创建新工作区
   createWorkspace: async (title: string) => {
-    return apiService.post('/workspace/save', { title }, {
-      successMessage: '工作区创建成功',
-      errorMessage: '创建工作区失败'
-    });
+    try {
+      const response = await apiService.post('/workspace/save', { title });
+      showToast({
+        title: "创建成功",
+        description: "工作区创建成功",
+        variant: "default",
+      });
+      return response;
+    } catch (error) {
+      showToast({
+        title: "创建失败",
+        description: error instanceof Error ? error.message : '创建工作区失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
   // 删除工作区
   deleteWorkspace: async (workspaceId: string) => {
-    return apiService.post('/workspace/delete', { workspace_id: workspaceId }, {
-      successMessage: '工作区删除成功',
-      errorMessage: '删除工作区失败'
-    });
+    try {
+      const response = await apiService.post('/workspace/delete', { workspace_id: workspaceId });
+      showToast({
+        title: "删除成功",
+        description: "工作区删除成功",
+        variant: "default",
+      });
+      return response;
+    } catch (error) {
+      showToast({
+        title: "删除失败",
+        description: error instanceof Error ? error.message : '删除工作区失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
   // 重命名工作区
   renameWorkspace: async (workspaceId: string, title: string) => {
-    return apiService.post('/workspace/rename', { workspace_id: workspaceId, title }, {
-      successMessage: '工作区名称已更新',
-      errorMessage: '更新工作区名称失败'
-    });
+    try {
+      const response = await apiService.post('/workspace/rename', { workspace_id: workspaceId, title });
+      showToast({
+        title: "重命名成功",
+        description: "工作区名称已更新",
+        variant: "default",
+      });
+      return response;
+    } catch (error) {
+      showToast({
+        title: "重命名失败",
+        description: error instanceof Error ? error.message : '更新工作区名称失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
   // 创建新会话 return session id of new session
   createSession: async (workspaceId: string) => {
-    return apiService.post<string>('/session/save', { 
-      workspaceId, 
-      title: "New Thread" 
-    }, {
-      successMessage: '会话创建成功',
-      errorMessage: '创建会话失败'
-    });
+    try {
+      const response = await apiService.post<string>('/session/save', { 
+        workspaceId, 
+        title: "New Thread" 
+      });
+      showToast({
+        title: "创建成功",
+        description: "会话创建成功",
+        variant: "default",
+      });
+      return response;
+    } catch (error) {
+      showToast({
+        title: "创建失败",
+        description: error instanceof Error ? error.message : '创建会话失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
   // 删除会话
   deleteSession: async (sessionId: string) => {
-    return apiService.post<void>('/session/delete', { session_id: sessionId }, {
-      successMessage: '会话已删除',
-      errorMessage: '删除会话失败'
-    });
+    try {
+      const response = await apiService.post<void>('/session/delete', { session_id: sessionId });
+      showToast({
+        title: "删除成功",
+        description: "会话已删除",
+        variant: "default",
+      });
+      return response;
+    } catch (error) {
+      showToast({
+        title: "删除失败",
+        description: error instanceof Error ? error.message : '删除会话失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
   // 删除聊天消息
   deleteChatMessage: async (messageId: string) => {
-    return apiService.post('/history/delete', { message_id: messageId }, {
-      successMessage: '消息已删除',
-      errorMessage: '删除消息失败'
-    });
+    try {
+      const response = await apiService.post('/history/delete', { message_id: messageId });
+      showToast({
+        title: "删除成功",
+        description: "消息已删除",
+        variant: "default",
+      });
+      return response;
+    } catch (error) {
+      showToast({
+        title: "删除失败",
+        description: error instanceof Error ? error.message : '删除消息失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 
   // 重命名会话
   renameSession: async (sessionId: string, title: string) => {
-    return apiService.post('/session/rename', { session_id: sessionId, title }, {
-      silent: true // 不显示提示
-    });
+    try {
+      return await apiService.post('/session/rename', { session_id: sessionId, title });
+    } catch (error) {
+      showToast({
+        title: "重命名失败",
+        description: error instanceof Error ? error.message : '重命名会话失败',
+        variant: "destructive",
+      });
+      throw error;
+    }
   },
 }

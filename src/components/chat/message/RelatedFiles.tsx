@@ -1,14 +1,15 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronDown, ChevronRight, ExternalLink, FileText } from 'lucide-react';
+import { Calendar, ChevronDown, ChevronRight, ExternalLink, FileText, FileType, Percent } from 'lucide-react';
 import { useState } from 'react';
 
 interface RelatedFile {
@@ -28,6 +29,10 @@ export function RelatedFiles({ files }: RelatedFilesProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (!files.length) return null;
+
+  const formatSourceType = (type: string) => {
+    return type === 'unknown' ? '/' : type;
+  };
 
   return (
     <div className="mt-2 space-y-2">
@@ -56,7 +61,7 @@ export function RelatedFiles({ files }: RelatedFilesProps) {
               查看详情
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-4xl">
             <DialogHeader>
               <DialogTitle>关联文件详情</DialogTitle>
             </DialogHeader>
@@ -67,9 +72,10 @@ export function RelatedFiles({ files }: RelatedFilesProps) {
                     <TabsTrigger
                       key={file.file_id}
                       value={file.file_id.toString()}
-                      className="min-w-[100px]"
+                      className="min-w-[120px] flex items-center gap-2"
                     >
-                      {file.file_name}
+                      <FileText size={14} />
+                      <span className="truncate max-w-[100px]">{file.file_name}</span>
                     </TabsTrigger>
                   ))}
                 </TabsList>
@@ -82,21 +88,71 @@ export function RelatedFiles({ files }: RelatedFilesProps) {
                   value={file.file_id.toString()}
                   className="mt-4"
                 >
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-sm">文件信息</h4>
-                        <div className="text-sm space-y-1">
-                          <p>文件名：{file.file_name}</p>
-                          <p>文件类型：{file.file_type}</p>
-                          <p>创建时间：{new Date(file.created_at).toLocaleString()}</p>
-                          <p>相关度：{(file.similarity * 100).toFixed(2)}%</p>
+                  <div className="grid grid-cols-[300px,1fr] gap-6">
+                    <div className="space-y-6">
+                      <div className="rounded-lg border bg-card p-4 space-y-4">
+                        <h3 className="font-semibold flex items-center gap-2">
+                          <FileText size={16} />
+                          基本信息
+                        </h3>
+                        <div className="space-y-3 text-sm">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <FileType size={14} />
+                            <span className="w-16">文件类型:</span>
+                            <span className="font-medium text-foreground">{file.file_type}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Calendar size={14} />
+                            <span className="w-16">创建时间:</span>
+                            <span className="font-medium text-foreground">
+                              {new Date(file.created_at).toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Percent size={14} />
+                              <span className="w-16">相关度:</span>
+                              <div className="flex-1 flex items-center gap-2">
+                                <div className="flex-1 relative h-2 bg-secondary/30 rounded-full overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary/40 to-primary transition-all duration-500 ease-out"
+                                    style={{ 
+                                      width: `${Math.max(file.similarity * 100, 50)}%`,
+                                      opacity: file.similarity > 0 ? 1 : 0.5
+                                    }}
+                                  />
+                                  <div 
+                                    className="absolute top-0 left-0 h-full bg-primary/20 transition-all duration-500"
+                                    style={{ width: '50%' }}
+                                  />
+                                </div>
+                                <Badge variant="secondary" className="shrink-0">
+                                  {(file.similarity * 100).toFixed(2)}%
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-sm">文件预览</h4>
-                        {/* TODO: 根据文件类型显示不同的预览 */}
-                        <div className="border rounded-md p-4 h-[200px] overflow-auto">
+
+                      <div className="rounded-lg border bg-card p-4 space-y-4">
+                        <h3 className="font-semibold flex items-center gap-2">
+                          <ExternalLink size={16} />
+                          来源信息
+                        </h3>
+                        <div className="text-sm text-muted-foreground">
+                          <p>来源类型: {formatSourceType(file.source_type)}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border bg-card">
+                      <div className="p-4 border-b">
+                        <h3 className="font-semibold">文件预览</h3>
+                      </div>
+                      <div className="p-4 min-h-[500px]">
+                        {/* TODO: 根据文件类型显示不同的预览组件 */}
+                        <div className="h-full flex items-center justify-center text-muted-foreground">
                           文件预览区域
                         </div>
                       </div>
@@ -119,9 +175,18 @@ export function RelatedFiles({ files }: RelatedFilesProps) {
             >
               <FileText size={12} />
               <span className="truncate">{file.file_name}</span>
-              <span className="ml-auto">
-                {(file.similarity * 100).toFixed(2)}% 相关
-              </span>
+              <div className="ml-auto flex items-center gap-2">
+                <div className="w-20 h-1.5 bg-secondary/30 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-primary transition-all"
+                    style={{ 
+                      width: `${Math.max(file.similarity * 100, 50)}%`,
+                      opacity: file.similarity > 0 ? 1 : 0.5
+                    }}
+                  />
+                </div>
+                <span className="w-14 text-right">{(file.similarity * 100).toFixed(2)}%</span>
+              </div>
             </div>
           ))}
         </div>

@@ -1,4 +1,3 @@
-import { showToast } from '@/store/toast';
 import { chatApi } from '@/services/api/chat';
 import type { Session, Workspace } from '@/types/workspace';
 import { create } from 'zustand';
@@ -31,11 +30,6 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       set({ workspaces: response as Workspace[] });
     } catch (error) {
       console.error('Failed to fetch workspaces:', error);
-      showToast({
-        title: '获取工作区失败',
-        description: '请稍后重试',
-        variant: 'destructive',
-      });
     } finally {
       set({ loading: false });
     }
@@ -45,17 +39,8 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     try {
       await chatApi.createWorkspace(title);
       await get().fetchWorkspaces();
-      showToast({
-        title: '创建成功',
-        description: '工作区创建成功',
-      });
     } catch (error) {
       console.error('Failed to create workspace:', error);
-      showToast({
-        title: '创建失败',
-        description: '创建工作区失败',
-        variant: 'destructive',
-      });
     }
   },
 
@@ -70,11 +55,6 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       await get().fetchWorkspaces();
     } catch (error) {
       console.error('Failed to delete workspace:', error);
-      showToast({
-        title: '删除失败',
-        description: '删除工作区失败',
-        variant: 'destructive',
-      });
     }
   },
 
@@ -86,11 +66,6 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       return sessionId;
     } catch (error) {
       console.error('Failed to create session:', error);
-      showToast({
-        title: '创建失败',
-        description: '创建会话失败',
-        variant: 'destructive',
-      });
       throw error;
     }
   },
@@ -104,11 +79,6 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       await get().fetchWorkspaces();
     } catch (error) {
       console.error('Failed to delete session:', error);
-      showToast({
-        title: '删除失败',
-        description: '删除会话失败',
-        variant: 'destructive',
-      });
     }
   },
 })); 

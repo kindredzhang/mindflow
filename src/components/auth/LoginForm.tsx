@@ -5,7 +5,6 @@ import { Toaster } from '@/components/ui/toaster';
 import { authApi } from '@/services/api/auth';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { showToast } from '@/store/toast';
 
 export default function LoginForm() {
   const navigate = useNavigate();
@@ -18,21 +17,12 @@ export default function LoginForm() {
       const response = await authApi.login({ email, password });
       localStorage.setItem('access_token', response.access_token);
       localStorage.setItem('user_info', JSON.stringify(response.user));
-            
-      showToast({
-        title: "登录成功",
-        description: "正在跳转到主页...",
-      });
-
+  
       setTimeout(() => {
         navigate('/chat');
       }, 1000);
     } catch (error) {
-      showToast({
-        title: "登录失败",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
+      console.log(error);
     }
   };
 
@@ -52,6 +42,7 @@ export default function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="new-password"
               />
             </div>
             <div className="space-y-2">
@@ -62,6 +53,7 @@ export default function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="new-password"
               />
             </div>
           </div>

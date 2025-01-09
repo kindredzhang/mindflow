@@ -1,4 +1,3 @@
-import { showToast } from '@/store/toast';
 import { chatApi } from '@/services/api/chat';
 import type { Message } from '@/types/chat';
 import { create } from 'zustand';
@@ -37,17 +36,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
       set(state => ({
         messages: state.messages.filter(msg => msg.id !== messageId)
       }));
-      showToast({
-        title: '删除成功',
-        description: '消息已删除'
-      });
     } catch (error) {
       console.error('Failed to delete message:', error);
-      showToast({
-        title: '删除失败',
-        description: '删除消息失败',
-        variant: 'destructive'
-      });
     }
   },
 
@@ -58,11 +48,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
       set({ messages: history });
     } catch (error) {
       console.error('Failed to load chat history:', error);
-      showToast({
-        title: '加载失败',
-        description: '无法加载聊天记录',
-        variant: 'destructive'
-      });
     } finally {
       set({ loadingMessages: false });
     }

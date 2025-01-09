@@ -7,7 +7,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { useUserInfo } from '@/hooks/use-user-info';
 import type { FileUploadHistory } from '@/services/api/file';
 import { fileApi } from '@/services/api/file';
-import { AxiosError } from 'axios';
 import { AlertCircle, FileText, Upload } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { showToast } from '@/store/toast';
@@ -115,19 +114,6 @@ export default function KnowledgeBase() {
       
     } catch (error) {
       console.error('Failed to upload file:', error);
-      
-      let errorMessage = '文件上传失败';
-      if (error instanceof AxiosError && error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      
-      showToast({
-        title: "上传失败",
-        description: errorMessage,
-        variant: "destructive",
-      });
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -165,19 +151,9 @@ export default function KnowledgeBase() {
   const handleDeleteFile = async (fileId: string) => {
     try {
       await fileApi.deleteFile(fileId);
-      showToast({
-        title: "删除成功",
-        description: "文件已成功删除",
-        variant: "default"
-      });
       await fetchRecentFiles();
     } catch (error) {
       console.error('Failed to delete file:', error);
-      showToast({
-        title: "删除失败",
-        description: "文件删除失败，请稍后重试",
-        variant: "destructive"
-      });
     }
   };
 
@@ -191,11 +167,6 @@ export default function KnowledgeBase() {
       setFilesToConfirm([]);
     } catch (error) {
       console.error('File upload failed:', error);
-      showToast({
-        title: "上传失败",
-        description: "文件上传失败，请重试",
-        variant: "destructive",
-      });
     } finally {
       setUploading(false);
     }
@@ -210,13 +181,6 @@ export default function KnowledgeBase() {
       formData.append('file', file);
       await fileApi.uploadFile(formData, departmentId);
     }
-
-    showToast({
-      title: "上传成功",
-      description: `文件已成功上传到${selectedScope === 'enterprise' ? '企业' : userInfo?.department_name}知识库`,
-      variant: "default",
-    });
-
     await fetchRecentFiles();
   };
 
