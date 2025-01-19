@@ -7,9 +7,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { useUserInfo } from '@/hooks/use-user-info';
 import type { FileUploadHistory } from '@/services/api/file';
 import { fileApi } from '@/services/api/file';
+import { showToast } from '@/store/toast';
 import { AlertCircle, FileText, Upload } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { showToast } from '@/store/toast';
 
 interface FileToConfirm {
   file: File;
@@ -79,8 +79,40 @@ export default function KnowledgeBase() {
     }
   };
 
+  // 添加文件格式验证函数
+  const validateFileType = (file: File): boolean => {
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain'
+    ];
+    const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt'];
+    
+    // 检查文件类型
+    if (!allowedTypes.includes(file.type)) {
+      // 如果 type 检查失败，再检查文件扩展名
+      const extension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+      if (!allowedExtensions.includes(extension)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
+
+    // 验证所有文件格式
+    const invalidFiles = Array.from(files).filter(file => !validateFileType(file));
+    if (invalidFiles.length > 0) {
+      showToast({
+        title: "格式错误",
+        description: "仅支持 PDF、Word、Docx、Txt 格式文件",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setUploading(true);
     const filesToProcess: FileToConfirm[] = [];
@@ -245,7 +277,7 @@ export default function KnowledgeBase() {
                     <p className="mb-2 text-sm text-muted-foreground">
                       <span className="font-semibold">点击上传</span> 或拖拽文件至此处
                     </p>
-                    <p className="text-xs text-muted-foreground">支持 PDF、Word、Excel、PPT 等格式</p>
+                    <p className="text-xs text-muted-foreground">支持 PDF、Word、Docx、Txt 格式</p>
                   </>
                 )}
               </div>
@@ -256,7 +288,7 @@ export default function KnowledgeBase() {
                 onChange={handleInputChange} 
                 multiple 
                 disabled={uploading}
-                accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,.md,.csv"
+                accept=".pdf,.doc,.docx,.txt"
               />
             </label>
           </div>

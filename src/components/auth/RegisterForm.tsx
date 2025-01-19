@@ -17,7 +17,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 interface Department {
-  id: number;
+  id: string;
   name: string;
 }
 
@@ -36,10 +36,14 @@ export default function RegisterForm() {
     const fetchDepartments = async () => {
       try {
         const departments = await authApi.getDepartments();
-        console.log(departments);
         setDepartments(departments);
       } catch (error) {
-        console.error('Failed to fetch departments:', error);
+        console.log(error);
+        showToast({
+          title: "获取部门失败",
+          description: "请稍后再试",
+          variant: "destructive",
+        })
         setDepartments([]);
       }
     };
@@ -76,6 +80,11 @@ export default function RegisterForm() {
       setCountdown(60);
     } catch (error) {
       console.log(error);
+      showToast({
+        title: "发送验证码失败",
+        description: "请稍后再试",
+        variant: "destructive",
+      })
     }
   };
 
@@ -103,6 +112,11 @@ export default function RegisterForm() {
       }, 1500);
     } catch (error) {
       console.log(error);
+      showToast({
+        title: "注册失败",
+        description: "请稍后再试",
+        variant: "destructive",
+      })
     }
   };
 
@@ -158,9 +172,9 @@ export default function RegisterForm() {
                   <SelectGroup>
                     <SelectLabel>可选部门</SelectLabel>
                     {Array.isArray(departments) && departments
-                      .filter(dept => dept.id !== 0)
+                      .filter(dept => dept.id !== '0')
                       .map(dept => (
-                        <SelectItem key={dept.id} value={dept.id.toString()}>
+                        <SelectItem key={dept.id} value={dept.id}>
                           {dept.name}
                         </SelectItem>
                       ))}

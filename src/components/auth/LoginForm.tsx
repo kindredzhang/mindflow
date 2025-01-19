@@ -18,9 +18,14 @@ export default function LoginForm() {
       localStorage.setItem('access_token', response.access_token);
       localStorage.setItem('user_info', JSON.stringify(response.user));
   
-      setTimeout(() => {
-        navigate('/chat');
-      }, 1000);
+      const savedToken = localStorage.getItem('access_token');
+      console.log(savedToken);
+      if (!savedToken) {
+        throw new Error('Token not saved properly');
+      }
+
+      navigate('/chat', { replace: true });
+
     } catch (error) {
       console.log(error);
     }

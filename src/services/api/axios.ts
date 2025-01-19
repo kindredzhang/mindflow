@@ -30,9 +30,10 @@ export type RequestData =
   | FormData;
 
 interface StandardResponse<T = unknown> {
-  code: number;
+  status: number;
   message: string;
   data: T;
+  timestamp?: number;
 }
 
 // 创建 API 服务类
@@ -88,7 +89,7 @@ class ApiService {
         const config = response.config;
         
         // 处理401登录过期的情况
-        if (res.code === 401) {
+        if (res.status === 401) {
           // 清除登录信息
           localStorage.removeItem('access_token');
           localStorage.removeItem('user');
@@ -108,9 +109,8 @@ class ApiService {
           return Promise.reject(new Error(res.message));
         }
         
-        // 处理其他非200的情况
-        if (res.code !== 200) {
-          // 如果设置了customError，不显示默认错误提示
+        // 修改判断条件，使用 status 而不是 code
+        if (res.status !== 200) {
           if (!config.customError) {
             showToast({
               title: "错误",

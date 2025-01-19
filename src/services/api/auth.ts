@@ -3,7 +3,7 @@ import { showToast } from '@/store/toast';
 import { BaseResponse } from '@/types/auth';
 
 interface Department {
-  id: number;
+  id: string;
   name: string;
 }
 
@@ -36,44 +36,14 @@ interface LoginResponse {
 export const authApi = {
   // 登录
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
-    try {
-      const response = await apiService.post<LoginResponse>('/auth/login', credentials);
-      showToast({
-        title: "登录成功",
-        description: "欢迎回来！",
-        variant: "default",
-      });
-      return response;
-    } catch (error) {
-      showToast({
-        title: "登录失败",
-        description: error instanceof Error ? error.message : '登录失败',
-        variant: "destructive",
-      });
-      throw error;
-    }
+    const response = await apiService.post<LoginResponse>('/auth/login', credentials);
+    return response;
   },
 
   // 注册
   register: async (credentials: RegisterCredentials): Promise<BaseResponse<string>> => {
-    try {
-      const response = await apiService.post<BaseResponse<string>>('/auth/register', credentials, {
-        customError: true
-      });
-      showToast({
-        title: "注册成功",
-        description: "即将跳转到登录页面...",
-        variant: "default",
-      });
-      return response;
-    } catch (error) {
-      showToast({
-        title: "注册失败",
-        description: error instanceof Error ? error.message : '注册失败',
-        variant: "destructive",
-      });
-      throw error;
-    }
+    const response = await apiService.post<BaseResponse<string>>('/auth/register', credentials);
+    return response;
   },
     
   // 登出

@@ -363,7 +363,7 @@ export default function WorkspaceList({
                           <FolderCog size={14} className="text-muted-foreground hover:text-foreground" />
                         </button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl">
+                      <DialogContent className="max-w-2xl h-[85vh] flex flex-col overflow-hidden">
                         <DialogHeader>
                           <DialogTitle>文件管理</DialogTitle>
                           <DialogDescription>
@@ -371,20 +371,20 @@ export default function WorkspaceList({
                           </DialogDescription>
                         </DialogHeader>
                         
-                        <div className="flex flex-col h-[600px]">
-                          <div className="flex items-center space-x-2 mb-4">
+                        <div className="flex-1 min-h-0 flex flex-col">
+                          <div className="shrink-0 mb-4">
                             <Input
                               placeholder="搜索文件..."
                               value={searchQuery}
                               onChange={(e) => setSearchQuery(e.target.value)}
-                              className="flex-1"
+                              className="w-full"
                             />
                           </div>
                           
-                          <div className="flex-1 min-h-0 flex gap-4">
+                          <div className="flex-1 min-h-0 flex gap-4 mb-4">
                             {/* 左侧：可选择的文件列表 */}
                             <div className="flex-1 border rounded-lg overflow-hidden flex flex-col">
-                              <div className="p-3 border-b bg-muted/50 flex justify-between items-center">
+                              <div className="shrink-0 p-3 border-b bg-muted/50 flex justify-between items-center">
                                 <h3 className="font-medium">可选文件</h3>
                                 <button
                                   onClick={toggleAllFolders}
@@ -393,7 +393,7 @@ export default function WorkspaceList({
                                   {expandedFolders.size === fileTree.length ? '全部折叠' : '全部展开'}
                                 </button>
                               </div>
-                              <div className="flex-1 p-2 overflow-y-auto">
+                              <div className="flex-1 overflow-y-auto p-2">
                                 {isLoadingFiles ? (
                                   <LoadingSpinner text="加载文件列表..." />
                                 ) : (
@@ -457,14 +457,14 @@ export default function WorkspaceList({
                             
                             {/* 右侧：已选择的文件列表 */}
                             <div className="w-72 border rounded-lg overflow-hidden flex flex-col">
-                              <div className="p-3 border-b bg-muted/50">
+                              <div className="shrink-0 p-3 border-b bg-muted/50">
                                 <h3 className="font-medium">已关联文件</h3>
                               </div>
                               <div className="flex-1 overflow-y-auto">
                                 {isLoadingFiles ? (
                                   <LoadingSpinner text="加载已关联文件..." />
                                 ) : (
-                                  <div className="p-4 space-y-2">
+                                  <div className="space-y-2 p-4">
                                     {fileTree
                                       .flatMap(folder => folder.files)
                                       .filter(file => file.is_selected)
@@ -494,8 +494,8 @@ export default function WorkspaceList({
                               </div>
                             </div>
                           </div>
-                          
-                          <div className="flex justify-end space-x-2 mt-4 pt-4 border-t">
+
+                          <div className="shrink-0 flex justify-end space-x-2 pt-4 border-t">
                             <Button variant="outline" onClick={() => setSelectedFiles([])}>
                               重置
                             </Button>

@@ -29,6 +29,10 @@ export interface SendMessageRequest {
   file?: File;
 }
 
+interface CreateSessionResponse {
+  session_id: string;
+}
+
 export const chatApi = {
   // 获取工作区列表
   getWorkspaceSessions: async () => {
@@ -48,14 +52,22 @@ export const chatApi = {
   // 获取会话消息
   getChatHistory: async (sessionId: string) => {
     try {
-      const response = await apiService.get<Message[]>(`/chat/history/${sessionId}`);
+      const response = await apiService.get<Message[]>(`/chat/history/list?session_id=${sessionId}`);
       return response;
     } catch (error) {
-      showToast({
-        title: "获取失败",
-        description: error instanceof Error ? error.message : '获取聊天记录失败',
-        variant: "destructive",
-      });
+      if (error instanceof Error && error.message.includes('无效的session id')) {
+        showToast({
+          title: "获取失败",
+          description: "无效的session id",
+          variant: "destructive",
+        });
+      } else {
+        showToast({
+          title: "获取失败", 
+          description: error instanceof Error ? error.message : '获取聊天记录失败',
+          variant: "destructive",
+        });
+      }
       throw error;
     }
   },
@@ -175,16 +187,16 @@ export const chatApi = {
   // 创建新会话 return session id of new session
   createSession: async (workspaceId: string) => {
     try {
-      const response = await apiService.post<string>('/session/save', { 
-        workspaceId, 
-        title: "New Thread" 
+      const response = await apiService.post<CreateSessionResponse>('/session/save', { 
+        'workspace_id': workspaceId, 
+        'title': "New Thread" 
       });
       showToast({
         title: "创建成功",
         description: "会话创建成功",
         variant: "default",
       });
-      return response;
+      return response.session_id;
     } catch (error) {
       showToast({
         title: "创建失败",

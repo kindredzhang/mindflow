@@ -140,6 +140,10 @@ export default function ChatInterface() {
     setInput('');
     setIsSending(true);
     
+    // Create a temporary message ID for the user and AI messages
+    const userMessageId = crypto.randomUUID();
+    const aiMessageId = crypto.randomUUID();
+    
     try {
       const messageData: SendMessageRequest = {
         question,
@@ -151,22 +155,25 @@ export default function ChatInterface() {
         messageData.file = selectedFile;
       }
 
+      // Add user message
       const userMessage: Message = {
-        id: crypto.randomUUID(),
+        id: userMessageId,
         content: question,
         role: 'user',
         timestamp: Date.now(),
       };
       setMessages(prev => [...prev, userMessage]);
       
+      // Add initial AI message
       const aiMessage: Message = {
-        id: crypto.randomUUID(),
+        id: aiMessageId,
         content: '',
         role: 'assistant',
         timestamp: Date.now(),
       };
       setMessages(prev => [...prev, aiMessage]);
 
+      // Scroll to bottom
       setTimeout(() => {
         const chatContainer = document.querySelector('.chat-container');
         if (chatContainer) {
@@ -177,6 +184,7 @@ export default function ChatInterface() {
       const reader = await chatApi.sendMessage(messageData);
       let fullResponse = '';
       let currentSessionName = '';
+      let hasError = false;
       
       if (reader) {
         while (true) {
@@ -192,13 +200,16 @@ export default function ChatInterface() {
               
               switch (data.type) {
                 case 'error':
-                  toast.error(data.message || data.data?.message);
+                  hasError = true;
+                  // Remove the AI message if there's an error
+                  setMessages(prev => prev.filter(msg => msg.id !== aiMessageId));
+                  toast.error(data.message || data.data?.message || '对话发生错误');
                   break;
 
                 case 'metadata':
-                  if (data.data?.file_metadata) {
-                    setMessages(prev => prev.map((msg, index) => {
-                      if (index === prev.length - 1) {
+                  if (!hasError && data.data?.file_metadata) {
+                    setMessages(prev => prev.map(msg => {
+                      if (msg.id === aiMessageId) {
                         return {
                           ...msg,
                           relatedFiles: data.data.file_metadata
@@ -210,10 +221,10 @@ export default function ChatInterface() {
                   break;
                   
                 case 'chunk':
-                  if (data.data?.content) {
+                  if (!hasError && data.data?.content) {
                     fullResponse += data.data.content;
-                    setMessages(prev => prev.map((msg, index) => {
-                      if (index === prev.length - 1) {
+                    setMessages(prev => prev.map(msg => {
+                      if (msg.id === aiMessageId) {
                         return { ...msg, content: fullResponse };
                       }
                       return msg;
@@ -231,7 +242,9 @@ export default function ChatInterface() {
                   break;
 
                 case 'complete':
-                  console.log('Chat saved:', data.data?.message);
+                  if (!hasError) {
+                    console.log('Chat saved:', data.data?.message);
+                  }
                   break;
                   
                 default:
@@ -239,18 +252,26 @@ export default function ChatInterface() {
               }
             } catch (parseError) {
               console.error('Failed to parse server message:', line, parseError);
+              hasError = true;
+              // Remove the AI message if there's a parsing error
+              setMessages(prev => prev.filter(msg => msg.id !== aiMessageId));
+              toast.error('解析服务器响应时发生错误');
             }
           }
         }
       }
       
-      setIsFirstMessage(false);
-      setSelectedFile(null);
-      setQuotedMessage(null);
+      if (!hasError) {
+        setIsFirstMessage(false);
+        setSelectedFile(null);
+        setQuotedMessage(null);
+      }
       
     } catch (error) {
       console.error('Failed to send message:', error);
-      toast.error(error instanceof Error ? error.message : "未知错误");
+      // Remove the AI message if there's an error
+      setMessages(prev => prev.filter(msg => msg.id !== aiMessageId));
+      toast.error(error instanceof Error ? error.message : "发送消息失败");
     } finally {
       setIsSending(false);
     }
@@ -321,17 +342,17 @@ export default function ChatInterface() {
 
   const handleCreateSession = async (workspaceId: string) => {
     try {
-      const newSessionId = await chatApi.createSession(workspaceId);
+      const session_id = await chatApi.createSession(workspaceId);
       
       await fetchWorkspaces();
 
-      setSelectedSessionId(newSessionId);
+      setSelectedSessionId(session_id);
       
       setMessages([]);
       
       setLoadingMessages(true);
       try {
-        const history = await chatApi.getChatHistory(newSessionId);
+        const history = await chatApi.getChatHistory(session_id);
         setMessages(history);
       } catch (error) {
         console.error('Failed to load chat history:', error);
@@ -341,7 +362,7 @@ export default function ChatInterface() {
       }
       
       setTimeout(() => {
-        const newSessionElement = document.querySelector(`[data-session-id="${newSessionId}"]`);
+        const newSessionElement = document.querySelector(`[data-session-id="${session_id}"]`);
         newSessionElement?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
       
@@ -407,8 +428,9 @@ export default function ChatInterface() {
                         id="workspace-name"
                         value={newWorkspaceName}
                         onChange={(e) => setNewWorkspaceName(e.target.value)}
-                        placeholder="请输入工作区名称"
+                        placeholder="请输入工作区名称" 
                         className="w-full"
+                        autoComplete="off"
                       />
                     </div>
                     <div className="flex justify-end space-x-2">

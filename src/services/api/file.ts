@@ -32,7 +32,7 @@ export const fileApi = {
   // 获取最近上传的文件列表
   fileUploadHistory: async () => {
     try {
-      const response = await apiService.get<FileUploadHistory[]>('/common/file/upload/history');
+      const response = await apiService.get<FileUploadHistory[]>('/file/upload/history');
       return response;
     } catch (error) {
       showToast({
