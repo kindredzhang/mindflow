@@ -21,9 +21,10 @@ interface ChatMessageProps {
   onQuote: (messageId: string, content: string, role: 'user' | 'assistant') => void;
   onCopy: (content: string) => void;
   onSpeak: (content: string) => void;
+  onScrollToMessage?: (messageId: string) => void;
 }
 
-export function ChatMessage({ message, onDelete, onQuote, onCopy, onSpeak }: ChatMessageProps) {
+export function ChatMessage({ message, onDelete, onQuote, onCopy, onSpeak, onScrollToMessage }: ChatMessageProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = () => {
@@ -31,20 +32,22 @@ export function ChatMessage({ message, onDelete, onQuote, onCopy, onSpeak }: Cha
     setTimeout(() => onDelete(message.id), 300);
   };
 
+  const handleQuoteClick = (quotedMessageId: string) => {
+    onScrollToMessage?.(quotedMessageId);
+  };
+
   return (
-    <div className={`
-      group space-y-2 
-      transition-all duration-300 ease-in-out
-      ${isDeleting ? 'opacity-0 transform translate-y-3' : 'opacity-100'}
-    `}>
+    <div 
+      id={`message-${message.id}`}
+      className={`
+        group space-y-2 
+        transition-all duration-300 ease-in-out
+        ${isDeleting ? 'opacity-0 transform translate-y-3' : 'opacity-100'}
+      `}
+    >
       <div className="flex items-start gap-3">
         <MessageAvatar role={message.role} />
         <div className="relative flex-1 min-w-0">
-          {message.quotedMessage && (
-            <div className="mb-2 pl-4 border-l-2 border-primary/30 text-sm text-muted-foreground">
-              <p className="line-clamp-2 break-words">{message.quotedMessage.content}</p>
-            </div>
-          )}
           <div className={`
             rounded-2xl p-4
             ${message.role === 'user' 
@@ -56,6 +59,22 @@ export function ChatMessage({ message, onDelete, onQuote, onCopy, onSpeak }: Cha
               <MessageContent content={message.content} />
             ) : (
               <LoadingDots />
+            )}
+            {/* 展示引用消息 */}
+            {message.quoted_message && (
+              <div 
+                className="mt-2 pt-2 border-t border-primary/20 cursor-pointer hover:bg-primary/5 transition-colors"
+                onClick={() => handleQuoteClick(message.quoted_message!.id)}
+              >
+                <div className="text-xs text-muted-foreground mb-1">
+                  {message.quoted_message.role === 'user' ? '引用用户的消息:' : '回复上文:'}
+                </div>
+                <div className="pl-2 border-l-2 border-primary/30 text-sm text-muted-foreground">
+                  <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-1 prose-pre:my-0 prose-ul:my-1 prose-li:my-0 prose-blockquote:my-1">
+                    <MessageContent content={message.quoted_message.content} />
+                  </div>
+                </div>
+              </div>
             )}
           </div>
           <MessageActions 

@@ -3,10 +3,7 @@ export interface Message {
   content: string;
   role: 'user' | 'assistant';
   timestamp: number;
-  quotedMessage?: {
-    id: string;
-    content: string;
-  };
+  quoted_message?: QuotedMessage;
 }
 
 export interface SendMessageRequest {

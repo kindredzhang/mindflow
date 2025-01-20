@@ -1,0 +1,16 @@
+:root {
+  --highlight-color: rgba(var(--primary-rgb), 0.15);
+}
+
+.message-highlight {
+  animation: highlight 1s ease;
+}
+
+@keyframes highlight {
+  0% {
+    background-color: var(--highlight-color);
+  }
+  100% {
+    background-color: transparent;
+  }
+}

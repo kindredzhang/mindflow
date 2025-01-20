@@ -254,7 +254,31 @@ export default function ChatInterface() {
 
                 case 'complete':
                   if (!hasError) {
-                    console.log('Chat saved:', data.data?.message);
+                    // 实际消息存储之后得到真实数据库ID替换临时消息ID 
+                    const { user_message_id, assistant_message_id } = data.data || {};
+                    if (user_message_id && assistant_message_id) {
+                      console.log('Replacing temporary IDs with permanent ones:');
+                      console.log(`User message: ${tempUserMessageId} -> ${user_message_id}`);
+                      console.log(`Assistant message: ${tempAssistantMessageId} -> ${assistant_message_id}`);
+                      
+                      setMessages(prev => {
+                        const updated = prev.map(msg => {
+                          if (msg.id === tempUserMessageId) {
+                            console.log('Found and replacing user message');
+                            return { ...msg, id: user_message_id };
+                          }
+                          if (msg.id === tempAssistantMessageId) {
+                            console.log('Found and replacing assistant message');
+                            return { ...msg, id: assistant_message_id };
+                          }
+                          return msg;
+                        });
+                        
+                        return updated;
+                      });
+                    } else {
+                      console.warn('Missing message IDs in complete response:', data.data);
+                    }
                   }
                   break;
                   
@@ -410,6 +434,22 @@ export default function ChatInterface() {
     toast.success('消息已删除');
   };
 
+  const scrollToMessage = (messageId: string) => {
+    const element = document.getElementById(`message-${messageId}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+      
+      // 添加高亮动画效果
+      element.style.backgroundColor = 'var(--highlight-color)';
+      element.style.transition = 'background-color 1s ease';
+      
+      // 1秒后移除高亮
+      setTimeout(() => {
+        element.style.backgroundColor = '';
+      }, 1000);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[#1a1a1a]">
       <Navigation />
@@ -515,6 +555,7 @@ export default function ChatInterface() {
                       onSpeak={handleSpeakContent}
                       onDelete={handleDeleteMessage}
                       onQuote={(messageId, content, role) => handleQuote(messageId, content, role)}
+                      onScrollToMessage={scrollToMessage}
                     />
                   ))
                 )
