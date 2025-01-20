@@ -1,6 +1,9 @@
 import { Brain, FileText, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function WelcomeScreen() {
+  const navigate = useNavigate();
+
   return (
     <div className="h-full flex flex-col items-center justify-center translate-y-12">
       <div className="text-center space-y-8 max-w-3xl">
@@ -31,7 +34,10 @@ export function WelcomeScreen() {
             </div>
           </div>
 
-          <div className="group relative overflow-hidden rounded-xl border bg-background/50 p-6 hover:bg-accent/50 transition-all duration-300 hover:shadow-lg">
+          <div 
+            onClick={() => navigate('/knowledge')}
+            className="group relative overflow-hidden rounded-xl border bg-background/50 p-6 hover:bg-accent/50 transition-all duration-300 hover:shadow-lg cursor-pointer"
+          >
             <div className="flex flex-col items-center text-center space-y-4">
               <div className="rounded-full bg-indigo-500/10 p-3.5 group-hover:bg-indigo-500/20 transition-colors">
                 <FileText className="h-6 w-6 text-indigo-500" />
@@ -62,7 +68,26 @@ export function WelcomeScreen() {
 
         <div className="pt-12 text-center">
           <p className="text-sm text-muted-foreground/60 tracking-wide">
-            点击左侧「新建工作区」并开始体验 ✨
+            点击左侧
+            <button 
+              onClick={() => {
+                const newChatButton = document.querySelector('[aria-label="新建工作区"]');
+                if (newChatButton instanceof HTMLElement) {
+                  newChatButton.click();
+                }
+              }}
+              className="mx-1 text-primary hover:text-primary/80 transition-colors font-medium hover:underline decoration-dotted underline-offset-4"
+            >
+              「新建工作区」
+            </button>
+            或
+            <button 
+              onClick={() => navigate('/knowledge')}
+              className="mx-1 text-primary hover:text-primary/80 transition-colors font-medium hover:underline decoration-dotted underline-offset-4"
+            >
+              「上传文档」
+            </button>
+            并开始体验 ✨
           </p>
         </div>
       </div>

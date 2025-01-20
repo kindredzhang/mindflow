@@ -416,6 +416,7 @@ export default function ChatInterface() {
                 <DialogTrigger asChild>
                   <button
                     onClick={handleNewChat}
+                    aria-label="新建工作区"
                     className="w-full flex items-center justify-center space-x-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-md"
                   >
                     <MessageSquare size={16} />
