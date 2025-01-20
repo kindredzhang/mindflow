@@ -10,6 +10,7 @@ import { fileApi } from '@/services/api/file';
 import { showToast } from '@/store/toast';
 import { AlertCircle, FileText, Upload } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
+import { TruncatedFileName } from '../common/TruncatedFileName';
 
 interface FileToConfirm {
   file: File;
@@ -317,14 +318,14 @@ export default function KnowledgeBase() {
               >
                 <div className="flex items-start space-x-3">
                   <FileText className="text-primary flex-shrink-0" size={24} />
-                  <div className="flex-1">
-                    <h3 className="text-foreground font-medium">{file.file_name}</h3>
+                  <div className="flex-1 min-w-0">
+                    <TruncatedFileName fileName={file.file_name} />
                     <p className="text-muted-foreground text-sm">
                       上传于 {new Date(file.created_at).toLocaleDateString()}
                     </p>
                   </div>
                   {file.can_delete && (
-                    <div className="flex items-center">
+                    <div className="flex items-center flex-shrink-0">
                       <DeleteButton
                         onDelete={() => handleDeleteFile(file.id.toString())}
                         className="flex items-center justify-center"
