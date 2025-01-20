@@ -13,5 +13,11 @@ export interface SendMessageRequest {
   question: string;
   session_id?: string;
   file?: File;
-  quoted_message_id?: string;
+  quoted_message?: QuotedMessage;
 } 
+
+export interface QuotedMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+}

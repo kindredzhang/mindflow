@@ -18,7 +18,7 @@ interface ChatMessageProps {
     }>;
   };
   onDelete: (id: string) => void;
-  onQuote: (messageId: string, content: string) => void;
+  onQuote: (messageId: string, content: string, role: 'user' | 'assistant') => void;
   onCopy: (content: string) => void;
   onSpeak: (content: string) => void;
 }
@@ -58,14 +58,13 @@ export function ChatMessage({ message, onDelete, onQuote, onCopy, onSpeak }: Cha
               <LoadingDots />
             )}
           </div>
-          {message.content && (
-            <MessageActions 
-              content={message.content}
-              messageId={message.id}
-              onDelete={handleDelete}
-              onQuote={onQuote}
-            />
-          )}
+          <MessageActions 
+            content={message.content}
+            messageId={message.id}
+            role={message.role}
+            onDelete={handleDelete}
+            onQuote={onQuote}
+          />
           {message.relatedFiles && (
             <RelatedFiles files={message.relatedFiles} />
           )}

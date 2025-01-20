@@ -1,6 +1,6 @@
 import { apiService } from "@/services/api/axios";
 import { showToast } from '@/store/toast';
-import { Message } from "@/types";
+import { Message, QuotedMessage } from "@/types";
 import { handleRequest } from '@/utils/request';
 
 export interface Session {
@@ -27,6 +27,7 @@ export interface SendMessageRequest {
   question: string;
   session_id?: string;
   file?: File;
+  quoted_message?: QuotedMessage;
 }
 
 interface CreateSessionResponse {
@@ -81,6 +82,9 @@ export const chatApi = {
         formData.append('session_id', data.session_id || '0');
         if (data.file) {
           formData.append('file', data.file);
+        }
+        if (data.quoted_message) {
+          formData.append('quoted_message', JSON.stringify(data.quoted_message));
         }
 
         const response = await fetch('/api/chat/stream', {

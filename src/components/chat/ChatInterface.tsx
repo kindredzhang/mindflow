@@ -29,7 +29,7 @@ interface SendMessageRequest {
   chat_history?: Message[];
   file?: File;
   session_id?: string;
-  quoted_message_id?: string;
+  quoted_message?: QuotedMessage;
 }
 
 interface Session {
@@ -43,6 +43,12 @@ interface Workspace {
   workspace_title: string;
   workspace_created_at: string;
   sessions: Session[];
+}
+
+interface QuotedMessage {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant';
 }
 
 export default function ChatInterface() {
@@ -59,10 +65,7 @@ export default function ChatInterface() {
   const [newWorkspaceName, setNewWorkspaceName] = useState('');
   const [recentFiles, setRecentFiles] = useState<FileUploadHistory[]>([]);
   const [isSending, setIsSending] = useState(false);
-  const [quotedMessage, setQuotedMessage] = useState<{
-    messageId: string;
-    content: string;
-  } | null>(null);
+  const [quotedMessage, setQuotedMessage] = useState<QuotedMessage | null>(null);
   const [loadingRecentFiles, setLoadingRecentFiles] = useState(true);
   const [isFirstMessage, setIsFirstMessage] = useState(true);
 
@@ -124,8 +127,12 @@ export default function ChatInterface() {
     }
   };
 
-  const handleQuote = (messageId: string, content: string) => {
-    setQuotedMessage({ messageId, content });
+  const handleQuote = (messageId: string, content: string, role: 'user' | 'assistant') => {
+    setQuotedMessage({ 
+      id: messageId,
+      content,
+      role
+    });
     const inputElement = document.querySelector<HTMLTextAreaElement>('.chat-input');
     if (inputElement) {
       inputElement.focus();
@@ -148,7 +155,7 @@ export default function ChatInterface() {
       const messageData: SendMessageRequest = {
         question,
         session_id: selectedSessionId || '0',
-        quoted_message_id: quotedMessage?.messageId,
+        quoted_message: quotedMessage || undefined,
       };
 
       if (selectedFile) {
@@ -499,7 +506,7 @@ export default function ChatInterface() {
                       onCopy={handleCopyContent}
                       onSpeak={handleSpeakContent}
                       onDelete={handleDeleteMessage}
-                      onQuote={handleQuote}
+                      onQuote={(messageId, content, role) => handleQuote(messageId, content, role)}
                     />
                   ))
                 )

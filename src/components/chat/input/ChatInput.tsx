@@ -1,3 +1,4 @@
+import { QuotedMessage } from '@/types';
 import { FileText, Mic, Send, Upload, X } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
@@ -49,7 +50,7 @@ interface ChatInputProps {
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   selectedFile: File | null;
   isSending: boolean;
-  quotedMessage?: { messageId: string; content: string } | null;
+  quotedMessage?: QuotedMessage | null;
   onCancelQuote?: () => void;
 }
 
