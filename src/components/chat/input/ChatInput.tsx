@@ -147,100 +147,115 @@ export function ChatInput({
 
   return (
     <div className="border-t bg-[#1a1a1a]">
-      {quotedMessage && (
-        <div className="max-w-3xl mx-auto px-4 pt-3">
-          <div className="flex items-center gap-2 text-sm">
-            <div className="flex-1 pl-4 border-l-2 border-primary/30">
-              <p className="line-clamp-1 text-muted-foreground">
-                {quotedMessage.content}
-              </p>
+      <div className="max-w-3xl mx-auto px-4">
+        {/* 引用消息显示区域 */}
+        {quotedMessage && (
+          <div className="pt-3">
+            <div className="flex items-center gap-2 text-sm">
+              <div className="flex-1 pl-4 border-l-2 border-primary/30">
+                <p className="line-clamp-1 text-muted-foreground">
+                  {quotedMessage.content}
+                </p>
+              </div>
+              <button
+                onClick={onCancelQuote}
+                className="p-1 hover:bg-muted/20 rounded-md"
+              >
+                <X size={14} className="text-muted-foreground" />
+              </button>
             </div>
-            <button
-              onClick={onCancelQuote}
-              className="p-1 hover:bg-muted/20 rounded-md"
-            >
-              <X size={14} className="text-muted-foreground" />
-            </button>
           </div>
-        </div>
-      )}
-      <div className="max-w-3xl mx-auto px-4 py-3">
-        <form onSubmit={handleSubmit} className="relative">
-          <div className="flex items-center gap-2 bg-[#2a2a2a] rounded-lg p-1">
-            <div className="flex-1 flex items-center gap-2">
-              <textarea
-                ref={textareaRef}
-                value={value}
-                onChange={handleTextareaChange}
-                onCompositionStart={() => setIsComposing(true)}
-                onCompositionEnd={() => setIsComposing(false)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
-                    e.preventDefault();
-                    handleSubmit(e);
-                  }
-                }}
-                placeholder={isSending ? "AI 正在回复中..." : "发送消息..."}
-                className="flex-1 min-h-[48px] h-[48px] max-h-[220px] px-3 
-                           bg-transparent text-foreground placeholder:text-muted-foreground 
-                           focus:outline-none resize-none overflow-x-hidden
-                           leading-[48px] py-0"
-                disabled={isSending}
-              />
-              <div className="flex items-center gap-1 pr-2">
-                <button
-                  type="button"
-                  onClick={isRecording ? stopRecording : startRecording}
-                  className={`p-2 rounded-md transition-colors ${
-                    isRecording 
-                      ? 'text-primary bg-primary/20' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/20'
-                  }`}
+        )}
+
+        {/* 文件上传提示区域 */}
+        {selectedFile && (
+          <div className="mt-3 mb-2">
+            <div className="flex items-center justify-between bg-muted/20 px-3 py-2 rounded-md">
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <FileText size={16} />
+                <span className="truncate max-w-[300px]">{selectedFile.name}</span>
+              </div>
+              <button
+                onClick={() => onFileSelect({ target: { files: null } } as React.ChangeEvent<HTMLInputElement>)}
+                className="p-1 hover:bg-muted/20 rounded-md text-muted-foreground hover:text-foreground"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 输入框区域 */}
+        <div className="py-3">
+          <form onSubmit={handleSubmit} className="relative">
+            <div className="flex items-center gap-2 bg-[#2a2a2a] rounded-lg p-1">
+              <div className="flex-1 flex items-center gap-2">
+                <textarea
+                  ref={textareaRef}
+                  value={value}
+                  onChange={handleTextareaChange}
+                  onCompositionStart={() => setIsComposing(true)}
+                  onCompositionEnd={() => setIsComposing(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
+                      e.preventDefault();
+                      handleSubmit(e);
+                    }
+                  }}
+                  placeholder={isSending ? "AI 正在回复中..." : "发送消息..."}
+                  className="flex-1 min-h-[48px] h-[48px] max-h-[220px] px-3 
+                             bg-transparent text-foreground placeholder:text-muted-foreground 
+                             focus:outline-none resize-none overflow-x-hidden
+                             leading-[48px] py-0"
                   disabled={isSending}
-                >
-                  <Mic size={20} className={isRecording ? 'animate-pulse' : ''} />
-                </button>
-                <label 
-                  htmlFor="file-upload" 
-                  className={`p-2 rounded-md transition-colors ${
-                    isSending 
-                      ? 'opacity-50 cursor-not-allowed' 
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/20 cursor-pointer'
-                  }`}
-                >
-                  <Upload size={20} />
-                  <input
-                    id="file-upload"
-                    type="file"
-                    className="hidden"
-                    onChange={onFileSelect}
-                    accept=".pdf,.doc,.docx,.txt"
+                />
+                <div className="flex items-center gap-1 pr-2">
+                  <button
+                    type="button"
+                    onClick={isRecording ? stopRecording : startRecording}
+                    className={`p-2 rounded-md transition-colors ${
+                      isRecording 
+                        ? 'text-primary bg-primary/20' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/20'
+                    }`}
                     disabled={isSending}
-                  />
-                </label>
-                <button
-                  type="submit"
-                  className={`p-2 rounded-md transition-colors ${
-                    isSending 
-                      ? 'opacity-50 cursor-not-allowed'
-                      : 'text-primary hover:bg-primary/20'
-                  }`}
-                  disabled={isSending}
-                >
-                  <Send size={20} className={isSending ? 'animate-pulse' : ''} />
-                </button>
+                  >
+                    <Mic size={20} className={isRecording ? 'animate-pulse' : ''} />
+                  </button>
+                  <label 
+                    htmlFor="file-upload" 
+                    className={`p-2 rounded-md transition-colors ${
+                      isSending 
+                        ? 'opacity-50 cursor-not-allowed' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/20 cursor-pointer'
+                    }`}
+                  >
+                    <Upload size={20} />
+                    <input
+                      id="file-upload"
+                      type="file"
+                      className="hidden"
+                      onChange={onFileSelect}
+                      accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp,.gif,.json,.md"
+                      disabled={isSending}
+                    />
+                  </label>
+                  <button
+                    type="submit"
+                    className={`p-2 rounded-md transition-colors ${
+                      isSending 
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'text-primary hover:bg-primary/20'
+                    }`}
+                    disabled={isSending}
+                  >
+                    <Send size={20} className={isSending ? 'animate-pulse' : ''} />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-          {selectedFile && (
-            <div className="absolute -top-8 left-0 right-0">
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground bg-muted/50 px-3 py-1 rounded">
-                <FileText size={14} />
-                <span className="truncate">{selectedFile.name}</span>
-              </div>
-            </div>
-          )}
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

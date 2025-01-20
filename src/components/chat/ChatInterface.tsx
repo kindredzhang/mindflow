@@ -122,9 +122,7 @@ export default function ChatInterface() {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-    }
+    setSelectedFile(file || null);
   };
 
   const handleQuote = (messageId: string, content: string, role: 'user' | 'assistant') => {
