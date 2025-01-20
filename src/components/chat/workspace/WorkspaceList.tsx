@@ -26,6 +26,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useDebounce } from '@/hooks/useDebounce';
 import { chatApi } from "@/services/api/chat";
 import { fileApi, FileTree } from "@/services/api/file";
 import { ChevronDown, ChevronRight, File, Folder, FolderCog, FolderOpen, MessageSquare, Pencil, Plus, Trash2, X } from 'lucide-react';
@@ -65,6 +66,11 @@ export default function WorkspaceList({
   fetchWorkspaces,
   loading
 }: WorkspaceListProps) {
+  const debouncedCreateSession = useDebounce(
+    (workspaceId: string) => onCreateSession(workspaceId),
+    { wait: 1000 }
+  );
+
   const [expandedWorkspaceId, setExpandedWorkspaceId] = useState<string | null>(() => {
     return workspaces.length === 1 ? workspaces[0]?.workspace_id : null;
   });
@@ -647,7 +653,7 @@ export default function WorkspaceList({
                     <div className="relative">
                       <div className="absolute left-[-1.25rem] top-1/2 w-3 h-px bg-border" />
                       <button
-                        onClick={() => onCreateSession(workspace.workspace_id)}
+                        onClick={() => debouncedCreateSession(workspace.workspace_id)}
                         className="w-full flex items-center space-x-1.5 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-sm"
                       >
                         <Plus size={14} className="flex-shrink-0" />
