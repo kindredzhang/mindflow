@@ -159,12 +159,13 @@ export default function ChatInterface() {
         messageData.file = selectedFile;
       }
 
-      // Add temporary messages with unique IDs
+      // 添加临时消息，用于在服务器响应中替换
       const tempUserMessage: Message = {
         id: tempUserMessageId,
         content: question,
         role: 'user',
         timestamp: Date.now(),
+        quoted_message: quotedMessage || undefined,
       };
       
       const tempAiMessage: Message = {

@@ -5,6 +5,7 @@ import { LoadingDots } from '@/components/common/LoadingDots';
 import type { Message } from '@/types';
 import { useState } from 'react';
 import { RelatedFiles } from './RelatedFiles';
+import { MessageSquareQuote } from 'lucide-react';
 
 interface ChatMessageProps {
   message: Message & {
@@ -63,13 +64,18 @@ export function ChatMessage({ message, onDelete, onQuote, onCopy, onSpeak, onScr
             {/* 展示引用消息 */}
             {message.quoted_message && (
               <div 
-                className="mt-2 pt-2 border-t border-primary/20 cursor-pointer hover:bg-primary/5 transition-colors"
+                className="mt-2 pt-2 border-t border-primary/20 group/quote relative"
                 onClick={() => handleQuoteClick(message.quoted_message!.id)}
               >
-                <div className="text-xs text-muted-foreground mb-1">
+                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/quote:opacity-100 transition-opacity duration-200 rounded-md" />
+                
+                <div className="relative flex items-center text-xs text-muted-foreground mb-1">
+                  <MessageSquareQuote size={14} className="mr-1 text-primary/60" />
                   {message.quoted_message.role === 'user' ? '引用用户的消息:' : '回复上文:'}
                 </div>
-                <div className="pl-2 border-l-2 border-primary/30 text-sm text-muted-foreground">
+
+                <div className="relative pl-2 border-l-2 border-primary/30 text-sm text-muted-foreground 
+                              group-hover/quote:border-primary/50 transition-colors duration-200">
                   <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-1 prose-pre:my-0 prose-ul:my-1 prose-li:my-0 prose-blockquote:my-1">
                     <MessageContent content={message.quoted_message.content} />
                   </div>
