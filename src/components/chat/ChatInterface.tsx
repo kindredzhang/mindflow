@@ -411,13 +411,31 @@ export default function ChatInterface() {
     }
   };
 
-  const handleCopyContent = (content: string) => {
-    navigator.clipboard.writeText(content).then(() => {
+  const handleCopyContent = async (content: string) => {
+    try {
+      // 首先尝试使用 Clipboard API
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(content);
+      } else {
+        // 后备方案：使用传统的复制方法
+        const textarea = document.createElement('textarea');
+        textarea.value = content;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
       toast.success('已复制到剪贴板');
-    });
+    } catch (error) {
+      console.error('Copy failed:', error);
+      toast.error('复制失败');
+    }
   };
 
   const handleSpeakContent = (content: string) => {
+    console.log('Speaking content:', content);
     if (window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
       toast.success('已停止朗读');

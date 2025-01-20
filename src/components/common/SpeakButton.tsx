@@ -5,9 +5,10 @@ import { toast } from 'react-hot-toast';
 interface SpeakButtonProps {
   content: string;
   className?: string;
+  onSpeak?: (content: string) => void;
 }
 
-export function SpeakButton({ content, className = '' }: SpeakButtonProps) {
+export function SpeakButton({ content, className = '', onSpeak }: SpeakButtonProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   const handleSpeak = () => {
@@ -23,9 +24,12 @@ export function SpeakButton({ content, className = '' }: SpeakButtonProps) {
       utterance.onerror = () => setIsSpeaking(false);
       window.speechSynthesis.speak(utterance);
       toast.success('正在朗读内容');
-    }
+      if (onSpeak) {
+        onSpeak(content);
+      }
+      }
   };
-
+  
   useEffect(() => {
     return () => {
       if (window.speechSynthesis.speaking) {

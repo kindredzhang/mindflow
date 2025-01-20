@@ -10,13 +10,23 @@ interface MessageActionsProps {
   role: 'user' | 'assistant';
   onDelete: () => void;
   onQuote: (messageId: string, content: string, role: 'user' | 'assistant') => void;
+  onCopy: (content: string) => void;
+  onSpeak: (content: string) => void;
 }
 
-export function MessageActions({ content, messageId, role, onDelete, onQuote }: MessageActionsProps) {
+export function MessageActions({ 
+  content, 
+  messageId, 
+  role, 
+  onDelete, 
+  onQuote,
+  onCopy,
+  onSpeak
+}: MessageActionsProps) {
   return (
     <div className="absolute left-0 -bottom-6 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-      <CopyButton content={content} />
-      <SpeakButton content={content} />
+      <CopyButton content={content} onCopy={onCopy} />
+      <SpeakButton content={content} onSpeak={onSpeak} />
       <IconButton
         icon={Quote}
         onClick={() => onQuote(messageId, content, role)}

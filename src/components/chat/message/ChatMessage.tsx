@@ -3,9 +3,9 @@ import { MessageAvatar } from '@/components/chat/message/MessageAvatar';
 import { MessageContent } from '@/components/chat/message/MessageContent';
 import { LoadingDots } from '@/components/common/LoadingDots';
 import type { Message } from '@/types';
+import { MessageSquareQuote } from 'lucide-react';
 import { useState } from 'react';
 import { RelatedFiles } from './RelatedFiles';
-import { MessageSquareQuote } from 'lucide-react';
 
 interface ChatMessageProps {
   message: Message & {
@@ -89,6 +89,8 @@ export function ChatMessage({ message, onDelete, onQuote, onCopy, onSpeak, onScr
             role={message.role}
             onDelete={handleDelete}
             onQuote={onQuote}
+            onCopy={onCopy}
+            onSpeak={onSpeak}
           />
           {message.relatedFiles && (
             <RelatedFiles files={message.relatedFiles} />
