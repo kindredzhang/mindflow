@@ -103,7 +103,13 @@ export default function WorkspaceList({
       setSelectedFiles(selectedFileIds);
       
       if (response.length > 0) {
-        setExpandedFolders(new Set([response[0].folder_id]));
+        // 默认展开第一个文件夹
+        // setExpandedFolders(new Set([response[0].folder_id]));
+        // 默认展开第一个有文件的文件夹
+        const firstFolderWithFiles = response.find(folder => folder.files.length > 0);
+        if (firstFolderWithFiles) {
+          setExpandedFolders(new Set([firstFolderWithFiles.folder_id]));
+        }
       }
     } catch (error) {
       console.error('Failed to fetch file tree:', error);
