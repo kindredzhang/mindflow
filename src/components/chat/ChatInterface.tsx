@@ -147,10 +147,6 @@ export default function ChatInterface() {
     setInput('');
     setIsSending(true);
     
-    // Create a temporary message ID for the user and AI messages
-    const userMessageId = crypto.randomUUID();
-    const aiMessageId = crypto.randomUUID();
-    
     try {
       const messageData: SendMessageRequest = {
         question,
@@ -162,24 +158,23 @@ export default function ChatInterface() {
         messageData.file = selectedFile;
       }
 
-      // Add user message
-      const userMessage: Message = {
-        id: userMessageId,
+      // Add temporary messages with loading state
+      const tempUserMessage: Message = {
+        id: 'temp-user',  // 临时ID，将被后端返回的ID替换
         content: question,
         role: 'user',
         timestamp: Date.now(),
       };
-      setMessages(prev => [...prev, userMessage]);
       
-      // Add initial AI message
-      const aiMessage: Message = {
-        id: aiMessageId,
+      const tempAiMessage: Message = {
+        id: 'temp-assistant', // 临时ID，将被后端返回的ID替换
         content: '',
         role: 'assistant',
         timestamp: Date.now(),
       };
-      setMessages(prev => [...prev, aiMessage]);
 
+      setMessages(prev => [...prev, tempUserMessage, tempAiMessage]);
+      
       // Scroll to bottom
       setTimeout(() => {
         const chatContainer = document.querySelector('.chat-container');
@@ -188,6 +183,7 @@ export default function ChatInterface() {
         }
       }, 100);
       
+      console.log('messageData', messageData);
       const reader = await chatApi.sendMessage(messageData);
       let fullResponse = '';
       let currentSessionName = '';
@@ -208,17 +204,19 @@ export default function ChatInterface() {
               switch (data.type) {
                 case 'error':
                   hasError = true;
-                  // Remove the AI message if there's an error
-                  setMessages(prev => prev.filter(msg => msg.id !== aiMessageId));
+                  // Remove the temporary messages if there's an error
+                  setMessages(prev => prev.filter(msg => msg.id !== 'temp-assistant' && msg.id !== 'temp-user'));
                   toast.error(data.message || data.data?.message || '对话发生错误');
                   break;
 
                 case 'metadata':
                   if (!hasError && data.data?.file_metadata) {
+                    // Update message with real ID from backend if provided
                     setMessages(prev => prev.map(msg => {
-                      if (msg.id === aiMessageId) {
+                      if (msg.id === 'temp-assistant') {
                         return {
                           ...msg,
+                          id: data.data.message_id || msg.id, // 使用后端返回的真实ID
                           relatedFiles: data.data.file_metadata
                         };
                       }
@@ -231,8 +229,12 @@ export default function ChatInterface() {
                   if (!hasError && data.data?.content) {
                     fullResponse += data.data.content;
                     setMessages(prev => prev.map(msg => {
-                      if (msg.id === aiMessageId) {
-                        return { ...msg, content: fullResponse };
+                      if (msg.id === 'temp-assistant') {
+                        return { 
+                          ...msg,
+                          content: fullResponse,
+                          id: data.data.message_id || msg.id // 使用后端返回的真实ID
+                        };
                       }
                       return msg;
                     }));
@@ -260,8 +262,8 @@ export default function ChatInterface() {
             } catch (parseError) {
               console.error('Failed to parse server message:', line, parseError);
               hasError = true;
-              // Remove the AI message if there's a parsing error
-              setMessages(prev => prev.filter(msg => msg.id !== aiMessageId));
+              // Remove the temporary messages if there's a parsing error
+              setMessages(prev => prev.filter(msg => msg.id !== 'temp-assistant' && msg.id !== 'temp-user'));
               toast.error('解析服务器响应时发生错误');
             }
           }
@@ -275,9 +277,8 @@ export default function ChatInterface() {
       }
       
     } catch (error) {
-      console.error('Failed to send message:', error);
-      // Remove the AI message if there's an error
-      setMessages(prev => prev.filter(msg => msg.id !== aiMessageId));
+      // Remove temporary messages on error
+      setMessages(prev => prev.filter(msg => msg.id !== 'temp-assistant' && msg.id !== 'temp-user'));
       toast.error(error instanceof Error ? error.message : "发送消息失败");
     } finally {
       setIsSending(false);
