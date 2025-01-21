@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useDebounce } from '@/hooks/use-debounce';
 import { chatApi } from '@/services/api/chat';
 import { fileApi, FileUploadHistory } from '@/services/api/file';
 import type { Message } from '@/types';
@@ -20,9 +21,9 @@ import { MessageSquare, Upload } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LoadingSpinner } from '../common/LoadingSpinner';
-import { WelcomeScreen } from './WelcomeScreen';
-import WelcomeChatScreen from './welcome/WelcomeChatScreeen';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { WelcomeScreen } from '@/components/chat/WelcomeScreen';
+import WelcomeChatScreen from '@/components/chat/welcome/WelcomeChatScreeen';
 
 interface SendMessageRequest {
   question: string;
@@ -369,14 +370,22 @@ export default function ChatInterface() {
     }
   };
 
-  const handleCreateWorkspace = async (e: React.FormEvent) => {
+  const debouncedCreateWorkspace = useDebounce(async (workspaceName: string) => {
+    try {
+      await chatApi.createWorkspace(workspaceName);
+      await fetchWorkspaces();
+      setNewWorkspaceName('');
+      setIsNewWorkspaceDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to create workspace:', error);
+      toast.error('创建工作区失败');
+    }
+  }, 500);
+
+  const handleCreateWorkspace = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newWorkspaceName.trim()) return;
-
-    await chatApi.createWorkspace(newWorkspaceName);
-    await fetchWorkspaces();
-    setNewWorkspaceName('');
-    setIsNewWorkspaceDialogOpen(false);
+    debouncedCreateWorkspace(newWorkspaceName);
   };
 
   const handleCreateSession = async (workspaceId: string) => {

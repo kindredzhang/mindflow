@@ -26,7 +26,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useDebounce } from '@/hooks/useDebounce';
+import { useDebounce } from '@/hooks/use-debounce';
 import { chatApi } from "@/services/api/chat";
 import { fileApi, FileTree } from "@/services/api/file";
 import { ChevronDown, ChevronRight, File, Folder, FolderCog, FolderOpen, MessageSquare, Pencil, Plus, Trash2, X } from 'lucide-react';
@@ -66,10 +66,7 @@ export default function WorkspaceList({
   fetchWorkspaces,
   loading
 }: WorkspaceListProps) {
-  const debouncedCreateSession = useDebounce(
-    (workspaceId: string) => onCreateSession(workspaceId),
-    { wait: 1000 }
-  );
+  const debouncedCreateSession = useDebounce(onCreateSession, 1000);
 
   const [expandedWorkspaceId, setExpandedWorkspaceId] = useState<string | null>(() => {
     return workspaces.length === 1 ? workspaces[0]?.workspace_id : null;

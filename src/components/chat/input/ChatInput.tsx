@@ -1,3 +1,4 @@
+import { useDebounce } from '@/hooks/use-debounce';
 import { QuotedMessage } from '@/types';
 import { FileText, Mic, Send, Upload, X } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
@@ -139,10 +140,17 @@ export function ChatInput({
     textarea.style.overflowY = scrollHeight > 220 ? 'auto' : 'hidden';
   };
 
-  // 处理发送事件
-  const handleSubmit = (e: React.FormEvent) => {
+  // 创建防抖发送
+  const debouncedSubmit = useDebounce((e: React.FormEvent) => {
     onSend(e);
     resetTextareaHeight();
+  }, 500);
+
+  // 处理发送事件
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!value.trim() || isSending) return; // 如果没有内容或正在发送则不处理
+    debouncedSubmit(e);
   };
 
   return (
@@ -197,16 +205,17 @@ export function ChatInput({
                   onCompositionStart={() => setIsComposing(true)}
                   onCompositionEnd={() => setIsComposing(false)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
+                    if (e.key === 'Enter' && !e.shiftKey && !isComposing && !isSending) {
                       e.preventDefault();
                       handleSubmit(e);
                     }
                   }}
-                  placeholder={isSending ? "AI 正在回复中..." : "发送消息..."}
-                  className="flex-1 min-h-[48px] h-[48px] max-h-[220px] px-3 
+                  placeholder={isSending ? "AI 正在回复中..." : "给MindFlow发送消息..."}
+                  className={`flex-1 min-h-[48px] h-[48px] max-h-[220px] px-3 
                              bg-transparent text-foreground placeholder:text-muted-foreground 
                              focus:outline-none resize-none overflow-x-hidden
-                             leading-[48px] py-0"
+                             leading-[48px] py-0
+                             ${isSending ? 'cursor-not-allowed opacity-50' : ''}`}
                   disabled={isSending}
                 />
                 <div className="flex items-center gap-1 pr-2">
@@ -243,11 +252,11 @@ export function ChatInput({
                   <button
                     type="submit"
                     className={`p-2 rounded-md transition-colors ${
-                      isSending 
+                      isSending || !value.trim()
                         ? 'opacity-50 cursor-not-allowed'
                         : 'text-primary hover:bg-primary/20'
                     }`}
-                    disabled={isSending}
+                    disabled={isSending || !value.trim()}
                   >
                     <Send size={20} className={isSending ? 'animate-pulse' : ''} />
                   </button>
