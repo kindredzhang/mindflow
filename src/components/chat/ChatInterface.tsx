@@ -1,7 +1,10 @@
+import { WelcomeScreen } from '@/components/chat/WelcomeScreen';
 import { ChatInput } from '@/components/chat/input/ChatInput';
 import { ChatMessage } from '@/components/chat/message/ChatMessage';
+import WelcomeChatScreen from '@/components/chat/welcome/WelcomeChatScreeen';
 import { RecentFiles } from '@/components/chat/workspace/RecentFiles';
 import WorkspaceList from '@/components/chat/workspace/WorkspaceList';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ResizablePanel } from '@/components/common/ResizablePanel';
 import Navigation from '@/components/layout/Navigation';
 import { Button } from "@/components/ui/button";
@@ -21,9 +24,6 @@ import { MessageSquare, Upload } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { WelcomeScreen } from '@/components/chat/WelcomeScreen';
-import WelcomeChatScreen from '@/components/chat/welcome/WelcomeChatScreeen';
 
 interface SendMessageRequest {
   question: string;
@@ -215,6 +215,7 @@ export default function ChatInterface() {
 
                 case 'metadata':
                   if (!hasError && data.data?.file_metadata) {
+                    console.log('file_metadata:', data.data.file_metadata); 
                     // Update only the specific temporary assistant message
                     setMessages(prev => prev.map(msg => {
                       if (msg.id === tempAssistantMessageId) {

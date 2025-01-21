@@ -1,25 +1,73 @@
 import { CopyButton } from '@/components/common/CopyButton';
+import React, { useState } from 'react';
 import type { Components } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import type {
+  AccordionProps,
+  AriaProps,
+  CodeProps,
+  CustomComponentProps,
+  ErrorBlockProps,
+  I18nBlockProps,
+  TabGroupProps
+} from './types';
 
 interface MessageContentProps {
   content: string;
 }
 
+interface TabProps extends CustomComponentProps {
+  name: string;
+}
+
+const Tabs = ({ children }: TabGroupProps) => {
+  const childrenArray = React.Children.toArray(children);
+  const [activeTab, setActiveTab] = useState(0);
+
+  return (
+    <div className="border rounded-md my-3">
+      <div className="flex border-b">
+        {childrenArray.map((child: any, index) => (
+          <button
+            key={child.props.name}
+            className={`px-4 py-2 text-sm font-medium ${
+              activeTab === index
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+            onClick={() => setActiveTab(index)}
+          >
+            {child.props.name}
+          </button>
+        ))}
+      </div>
+      <div className="p-4">
+        {childrenArray[activeTab]}
+      </div>
+    </div>
+  );
+};
+
+const Tab = ({ children }: TabProps) => {
+  return <div>{children}</div>;
+};
+
 export function MessageContent({ content }: MessageContentProps) {
   const components: Partial<Components> = {
     // 基础文本格式
-    p: ({ children }) => (
+    p: ({ children }: CustomComponentProps) => (
       <p className="text-sm leading-relaxed text-foreground/90 mb-3 last:mb-0 break-words whitespace-pre-wrap">
         {children}
       </p>
     ),
     
     // 代码相关
-    code({ inline, className, children, ...props }) {
+    code: ({ inline, className, children }: CodeProps) => {
       const match = /language-(\w+)(:(.+))?/.exec(className || '');
       const language = match?.[1];
       const filepath = match?.[3];
@@ -52,9 +100,16 @@ export function MessageContent({ content }: MessageContentProps) {
     },
 
     // 特殊标签渲染
-    error: ({ children }) => (
-      <div className="bg-destructive/10 text-destructive/90 p-3 rounded-md text-sm my-3">
-        {children}
+    error: ({ code, severity, description, solution, reference }: ErrorBlockProps) => (
+      <div className="bg-destructive/10 text-destructive/90 p-4 rounded-md my-3">
+        <div className="font-medium">{code}</div>
+        <div>{description}</div>
+        {solution && <div className="mt-2">Solution: {solution}</div>}
+        {reference && (
+          <a href={reference} className="text-primary hover:underline mt-2 block">
+            Learn more
+          </a>
+        )}
       </div>
     ),
     warning: ({ children }) => (
@@ -172,16 +227,45 @@ export function MessageContent({ content }: MessageContentProps) {
         {children}
       </td>
     ),
+
+    // 新增的特殊组件
+    'accordion': ({ title, children }: AccordionProps) => (
+      <div className="border rounded-md my-3">
+        <div className="bg-muted/50 px-4 py-2 font-medium">{title}</div>
+        <div className="p-4">{children}</div>
+      </div>
+    ),
+
+    'tabs': (props: TabGroupProps) => {
+      return <Tabs {...props} />;
+    },
+
+    'tab': (props: TabProps) => {
+      return <Tab {...props} />;
+    },
+
+    'i18n-block': ({ code, children }: I18nBlockProps) => (
+      <div className="border-l-2 border-primary pl-4 my-3" lang={code}>
+        {children}
+      </div>
+    ),
+
+    'aria-label': ({ label, children }: AriaProps) => (
+      <div aria-label={label}>{children}</div>
+    ),
   };
 
   return (
-    <div className="prose prose-sm max-w-full overflow-hidden">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={components}
-      >
-        {content}
-      </ReactMarkdown>
-    </div>
+    <>
+      <div className="prose prose-sm max-w-full overflow-hidden">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeKatex]}
+          components={components}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
+    </>
   );
 } 
