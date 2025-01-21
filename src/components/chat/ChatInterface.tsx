@@ -260,18 +260,13 @@ export default function ChatInterface() {
                     // 实际消息存储之后得到真实数据库ID替换临时消息ID 
                     const { user_message_id, assistant_message_id } = data.data || {};
                     if (user_message_id && assistant_message_id) {
-                      console.log('Replacing temporary IDs with permanent ones:');
-                      console.log(`User message: ${tempUserMessageId} -> ${user_message_id}`);
-                      console.log(`Assistant message: ${tempAssistantMessageId} -> ${assistant_message_id}`);
-                      
+
                       setMessages(prev => {
                         const updated = prev.map(msg => {
                           if (msg.id === tempUserMessageId) {
-                            console.log('Found and replacing user message');
                             return { ...msg, id: user_message_id };
                           }
                           if (msg.id === tempAssistantMessageId) {
-                            console.log('Found and replacing assistant message');
                             return { ...msg, id: assistant_message_id };
                           }
                           return msg;

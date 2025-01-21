@@ -15,6 +15,7 @@ import { useState } from 'react';
 interface RelatedFile {
   file_id: number;
   file_name: string;
+  file_contents: string;
   similarity: number;
   source_type: string;
   created_at: string;
@@ -150,11 +151,22 @@ export function RelatedFiles({ files }: RelatedFilesProps) {
                       <div className="p-4 border-b">
                         <h3 className="font-semibold">文件预览</h3>
                       </div>
-                      <div className="p-4 min-h-[500px]">
-                        {/* TODO: 根据文件类型显示不同的预览组件 */}
-                        <div className="h-full flex items-center justify-center text-muted-foreground">
-                          文件预览区域
-                        </div>
+                      <div className="p-4 min-h-[500px] overflow-auto">
+                        {file.file_type.toLowerCase().includes('image') ? (
+                          <img 
+                            src={file.file_contents} 
+                            alt={file.file_name}
+                            className="max-w-full h-auto"
+                          />
+                        ) : file.file_type.toLowerCase().includes('pdf') ? (
+                          <div className="text-muted-foreground">
+                            PDF预览暂不支持
+                          </div>
+                        ) : (
+                          <pre className="whitespace-pre-wrap break-words text-sm">
+                            {file.file_contents}
+                          </pre>
+                        )}
                       </div>
                     </div>
                   </div>
