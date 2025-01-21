@@ -5,7 +5,7 @@ import { LoadingDots } from '@/components/common/LoadingDots';
 import type { Message } from '@/types';
 import { MessageSquareQuote } from 'lucide-react';
 import { useState } from 'react';
-import { RelatedFiles } from './RelatedFiles';
+import { RelatedFiles } from '@/components/chat/message/RelatedFiles';
 
 interface ChatMessageProps {
   message: Message & {
@@ -92,8 +92,8 @@ export function ChatMessage({ message, onDelete, onQuote, onCopy, onSpeak, onScr
             onCopy={onCopy}
             onSpeak={onSpeak}
           />
-          {message.relatedFiles && (
-            <RelatedFiles files={message.relatedFiles} />
+          {message.related_files && (
+            <RelatedFiles files={message.related_files} />
           )}
         </div>
       </div>

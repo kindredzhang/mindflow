@@ -222,7 +222,7 @@ export default function ChatInterface() {
                         return {
                           ...msg,
                           id: data.data.message_id || msg.id,
-                          relatedFiles: data.data.file_metadata
+                          related_files: data.data.file_metadata
                         };
                       }
                       return msg;

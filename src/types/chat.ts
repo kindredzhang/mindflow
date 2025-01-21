@@ -1,10 +1,12 @@
+import { RelatedFile } from "@/types";
+
 // 聊天相关类型定义
 export interface Message {
   id: string;
   content: string;
   role: 'user' | 'assistant';
   timestamp: number;
-  relatedFiles?: any; // 根据实际类型定义
+  related_files?: RelatedFile[];
 }
 
 export interface SendMessageRequest {
