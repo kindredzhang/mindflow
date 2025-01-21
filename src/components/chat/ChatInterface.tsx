@@ -515,6 +515,7 @@ export default function ChatInterface() {
                         placeholder="请输入工作区名称" 
                         className="w-full"
                         autoComplete="off"
+                        maxLength={20}
                       />
                     </div>
                     <div className="flex justify-end space-x-2">

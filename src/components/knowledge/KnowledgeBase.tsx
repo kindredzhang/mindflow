@@ -81,22 +81,14 @@ export default function KnowledgeBase() {
     }
   };
 
-  // 替换原来的 validateFileType 函数
-  const validateFiles = (files: File[]): string | null => {
-    for (const file of files) {
-      const errorMessage = FileUtils.getErrorMessage(file);
-      if (errorMessage) {
-        return errorMessage;
-      }
-    }
-    return null;
-  };
-
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
-    // 验证所有文件
-    const errorMessage = validateFiles(Array.from(files));
+    // 只取第一个文件
+    const file = files[0];
+
+    // 验证文件
+    const errorMessage = FileUtils.getErrorMessage(file);
     if (errorMessage) {
       showToast({
         title: "文件验证失败",
@@ -107,33 +99,21 @@ export default function KnowledgeBase() {
     }
 
     setUploading(true);
-    const filesToProcess: FileToConfirm[] = [];
-    const filesToUpload: FileToConfirm[] = [];
 
     try {
-      // 先检查所有文件
-      for (const file of Array.from(files)) {
-        const departmentId = selectedScope === 'enterprise' ? '0' : userInfo?.department_id ?? '0';
-        const result = await handleFileCheck(file, departmentId);
-        
-        if (!result) continue; // 检查失败或已向量化的文件跳过
-
-        if (result.needConfirm) {
-          filesToProcess.push({ file: result.file, departmentId: result.departmentId });
-        } else {
-          filesToUpload.push({ file: result.file, departmentId: result.departmentId });
-        }
+      const departmentId = selectedScope === 'enterprise' ? '0' : userInfo?.department_id ?? '0';
+      const result = await handleFileCheck(file, departmentId);
+      
+      if (!result) {
+        setUploading(false);
+        return;
       }
 
-      // 如果有需要确认的文件
-      if (filesToProcess.length > 0) {
-        setFilesToConfirm(filesToProcess);
+      if (result.needConfirm) {
+        setFilesToConfirm([{ file: result.file, departmentId: result.departmentId }]);
         setShowOverwriteDialog(true);
-        // 先上传不需要确认的文件
-        await uploadFiles(filesToUpload);
       } else {
-        // 直接上传所有文件
-        await uploadFiles(filesToUpload);
+        await uploadFiles([{ file: result.file, departmentId: result.departmentId }]);
       }
       
     } catch (error) {
@@ -271,6 +251,7 @@ export default function KnowledgeBase() {
                     <div className="text-xs text-muted-foreground space-y-1 text-center">
                       <p>支持格式：PDF、Word、Docx、Txt</p>
                       <p>大小限制：{FileUtils.formatFileSize(FILE_SIZE_LIMIT)}</p>
+                      <p>每次仅可上传一个文件</p>
                     </div>
                   </>
                 )}
@@ -280,7 +261,6 @@ export default function KnowledgeBase() {
                 type="file" 
                 className="hidden" 
                 onChange={handleInputChange} 
-                multiple 
                 disabled={uploading}
                 accept=".pdf,.doc,.docx,.txt"
               />
@@ -337,10 +317,7 @@ export default function KnowledgeBase() {
           <AlertDialogHeader>
             <AlertDialogTitle>确认覆盖文件？</AlertDialogTitle>
             <AlertDialogDescription>
-              {filesToConfirm.length > 1 
-                ? `有 ${filesToConfirm.length} 个文件已存在但尚未向量化。继续上传将覆盖这些文件，是否继续？`
-                : "该文件已存在但尚未向量化。继续上传将覆盖现有文件，是否继续？"
-              }
+              该文件已存在但尚未向量化。继续上传将覆盖现有文件，是否继续？
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

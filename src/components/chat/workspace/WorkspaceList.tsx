@@ -297,6 +297,7 @@ export default function WorkspaceList({
                     onChange={(e) => setNewSessionTitle(e.target.value)}
                     placeholder="请输入新的会话名称"
                     className="w-full"
+                    maxLength={20}
                   />
                 </div>
                 <div className="flex justify-end space-x-2">

@@ -150,7 +150,7 @@ export default function RegisterForm() {
         <div>
           <h2 className="text-center text-3xl font-bold text-foreground">创建账号</h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit} autoComplete="off">
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">邮箱</Label>
@@ -162,7 +162,7 @@ export default function RegisterForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-3/4"
                   required
-                  autoComplete="new-password"
+                  autoComplete="off"
                 />
                 <Button
                   type="button"
@@ -183,6 +183,7 @@ export default function RegisterForm() {
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value)}
                 required
+                autoComplete="off"
               />
             </div>
 
@@ -215,6 +216,7 @@ export default function RegisterForm() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                autoComplete="off"
               />
             </div>
 
@@ -226,7 +228,7 @@ export default function RegisterForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                autoComplete="new-password"
+                autoComplete="off"
               />
             </div>
 
@@ -238,6 +240,7 @@ export default function RegisterForm() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                autoComplete="off"
               />
             </div>
 
