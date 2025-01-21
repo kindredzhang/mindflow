@@ -1,5 +1,4 @@
 import { CopyButton } from '@/components/common/CopyButton';
-import React, { useState } from 'react';
 import type { Components } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -8,65 +7,24 @@ import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import type {
-  AccordionProps,
-  AriaProps,
   CodeProps,
-  CustomComponentProps,
   ErrorBlockProps,
-  I18nBlockProps,
-  TabGroupProps
 } from './types';
 
 interface MessageContentProps {
   content: string;
 }
 
-interface TabProps extends CustomComponentProps {
-  name: string;
-}
-
-const Tabs = ({ children }: TabGroupProps) => {
-  const childrenArray = React.Children.toArray(children);
-  const [activeTab, setActiveTab] = useState(0);
-
-  return (
-    <div className="border rounded-md my-3">
-      <div className="flex border-b">
-        {childrenArray.map((child: any, index) => (
-          <button
-            key={child.props.name}
-            className={`px-4 py-2 text-sm font-medium ${
-              activeTab === index
-                ? 'border-b-2 border-primary text-primary'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-            onClick={() => setActiveTab(index)}
-          >
-            {child.props.name}
-          </button>
-        ))}
-      </div>
-      <div className="p-4">
-        {childrenArray[activeTab]}
-      </div>
-    </div>
-  );
-};
-
-const Tab = ({ children }: TabProps) => {
-  return <div>{children}</div>;
-};
-
 export function MessageContent({ content }: MessageContentProps) {
   const components: Partial<Components> = {
-    // 基础文本格式
-    p: ({ children }: CustomComponentProps) => (
+    // 保留基础文本格式
+    p: ({ children }: { children: React.ReactNode }) => (
       <p className="text-sm leading-relaxed text-foreground/90 mb-3 last:mb-0 break-words whitespace-pre-wrap">
         {children}
       </p>
     ),
     
-    // 代码相关
+    // 保留代码相关
     code: ({ inline, className, children }: CodeProps) => {
       const match = /language-(\w+)(:(.+))?/.exec(className || '');
       const language = match?.[1];
@@ -99,8 +57,8 @@ export function MessageContent({ content }: MessageContentProps) {
       return <code className="bg-muted/50 px-1.5 py-0.5 text-sm rounded font-mono break-words">{children}</code>;
     },
 
-    // 特殊标签渲染
-    error: ({ code, severity, description, solution, reference }: ErrorBlockProps) => (
+    // 保留错误显示
+    error: ({ code, description, solution, reference }: ErrorBlockProps) => (
       <div className="bg-destructive/10 text-destructive/90 p-4 rounded-md my-3">
         <div className="font-medium">{code}</div>
         <div>{description}</div>
@@ -112,146 +70,56 @@ export function MessageContent({ content }: MessageContentProps) {
         )}
       </div>
     ),
-    warning: ({ children }) => (
-      <div className="bg-yellow-500/10 text-yellow-600/90 p-3 rounded-md text-sm my-3">
-        {children}
-      </div>
-    ),
-    note: ({ children }) => (
-      <div className="bg-primary/5 text-primary/90 p-3 rounded-md text-sm my-3">
-        {children}
-      </div>
-    ),
-    tip: ({ children }) => (
-      <div className="bg-green-500/10 text-green-600/90 p-3 rounded-md text-sm my-3">
-        {children}
-      </div>
-    ),
-    cmd: ({ children }) => (
-      <div className="relative group bg-card/50 border rounded-md p-3 font-mono text-sm my-3">
-        <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <CopyButton content={String(children)} />
-        </div>
-        {children}
-      </div>
-    ),
-    
-    // 结构化内容
-    steps: ({ children }) => (
-      <div className="space-y-2 my-3">
-        {children}
-      </div>
-    ),
-    diagnosis: ({ children }) => (
-      <div className="bg-blue-500/5 p-4 rounded-md space-y-2 my-3">
-        {children}
-      </div>
-    ),
-    compare: ({ children }) => (
-      <div className="grid grid-cols-2 gap-4 my-3">
-        {children}
-      </div>
-    ),
 
-    // 列表样式
-    ul: ({ children }) => (
+    // 保留基础列表样式
+    ul: ({ children }: { children: React.ReactNode }) => (
       <ul className="text-sm list-disc pl-6 mb-3 space-y-1 text-foreground/90">
         {children}
       </ul>
     ),
-    ol: ({ children }) => (
+    ol: ({ children }: { children: React.ReactNode }) => (
       <ol className="text-sm list-decimal pl-6 mb-3 space-y-1 text-foreground/90">
         {children}
       </ol>
     ),
-    li: ({ children }) => (
+    li: ({ children }: { children: React.ReactNode }) => (
       <li className="leading-relaxed">{children}</li>
     ),
 
-    // 引用和强调
-    blockquote: ({ children }) => (
-      <blockquote className="border-l-2 border-muted pl-4 italic text-foreground/75 my-3 break-words">
-        {children}
-      </blockquote>
-    ),
-    strong: ({ children }) => (
-      <strong className="font-medium text-foreground">
-        {children}
-      </strong>
-    ),
-
-    // 标题层级
-    h1: ({ children }) => (
+    // 保留标题样式
+    h1: ({ children }: { children: React.ReactNode }) => (
       <h1 className="text-xl font-semibold text-foreground mb-4 mt-6">
         {children}
       </h1>
     ),
-    h2: ({ children }) => (
+    h2: ({ children }: { children: React.ReactNode }) => (
       <h2 className="text-lg font-semibold text-foreground mb-3 mt-5">
         {children}
       </h2>
     ),
-    h3: ({ children }) => (
+    h3: ({ children }: { children: React.ReactNode }) => (
       <h3 className="text-base font-semibold text-foreground mb-3 mt-4">
         {children}
       </h3>
     ),
 
-    // 链接样式
-    a: ({ children, href }) => (
-      <a 
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-primary hover:underline"
-      >
-        {children}
-      </a>
-    ),
-
-    // 表格样式
-    table: ({ children }) => (
+    // 保留表格样式
+    table: ({ children }: { children: React.ReactNode }) => (
       <div className="overflow-x-auto my-3">
         <table className="min-w-full divide-y divide-border">
           {children}
         </table>
       </div>
     ),
-    th: ({ children }) => (
+    th: ({ children }: { children: React.ReactNode }) => (
       <th className="px-4 py-2 text-left text-sm font-medium text-foreground/90 bg-muted">
         {children}
       </th>
     ),
-    td: ({ children }) => (
+    td: ({ children }: { children: React.ReactNode }) => (
       <td className="px-4 py-2 text-sm text-foreground/80">
         {children}
       </td>
-    ),
-
-    // 新增的特殊组件
-    'accordion': ({ title, children }: AccordionProps) => (
-      <div className="border rounded-md my-3">
-        <div className="bg-muted/50 px-4 py-2 font-medium">{title}</div>
-        <div className="p-4">{children}</div>
-      </div>
-    ),
-
-    'tabs': (props: TabGroupProps) => {
-      return <Tabs {...props} />;
-    },
-
-    'tab': (props: TabProps) => {
-      return <Tab {...props} />;
-    },
-
-    'i18n-block': ({ code, children }: I18nBlockProps) => (
-      <div className="border-l-2 border-primary pl-4 my-3" lang={code}>
-        {children}
-      </div>
-    ),
-
-    'aria-label': ({ label, children }: AriaProps) => (
-      <div aria-label={label}>{children}</div>
     ),
   };
 

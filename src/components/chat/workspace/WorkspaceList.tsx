@@ -177,6 +177,21 @@ export default function WorkspaceList({
     }
   };
 
+  // 添加防抖处理的确认选择函数
+  const debouncedConfirmFileSelection = useDebounce(async (workspaceId: string) => {
+    if (selectedFiles.length === 0) return;
+    setProcessingFiles(true);
+    
+    try {
+      await fileApi.fileToEmbed(selectedFiles, workspaceId);
+      const response = await fileApi.folderFileList(workspaceId);
+      setFileTree(response);
+      setSelectedFiles([]);
+    } finally {
+      setProcessingFiles(false);
+    }
+  }, 1000);
+
   if (!workspaces || !Array.isArray(workspaces)) return null;
 
   const toggleWorkspace = (workspaceId: string) => {
@@ -194,20 +209,6 @@ export default function WorkspaceList({
         )
       : folder.files.filter(file => !file.is_selected)
   }));
-
-  const handleConfirmFileSelection = async (workspaceId: string) => {
-    if (selectedFiles.length === 0) return;
-    setProcessingFiles(true);
-    
-    try {
-      await fileApi.fileToEmbed(selectedFiles, workspaceId);
-      const response = await fileApi.folderFileList(workspaceId);
-      setFileTree(response);
-      setSelectedFiles([]);
-    } finally {
-      setProcessingFiles(false);
-    }
-  };
 
   const toggleFolder = (folderId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -509,7 +510,7 @@ export default function WorkspaceList({
                               重置
                             </Button>
                             <Button 
-                              onClick={() => handleConfirmFileSelection(workspace.workspace_id)}
+                              onClick={() => debouncedConfirmFileSelection(workspace.workspace_id)}
                               disabled={selectedFiles.length === 0 || processingFiles}
                             >
                               {processingFiles ? '处理中...' : '确认选择'}

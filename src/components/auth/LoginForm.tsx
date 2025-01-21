@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Toaster } from '@/components/ui/toaster';
+import { useDebounce } from '@/hooks/use-debounce';
 import { authApi } from '@/services/api/auth';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -10,9 +11,12 @@ export default function LoginForm() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const debouncedLogin = useDebounce(async (email: string, password: string) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    
     try {
       const response = await authApi.login({ email, password });
       localStorage.setItem('access_token', response.access_token);
@@ -28,7 +32,14 @@ export default function LoginForm() {
 
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsSubmitting(false);
     }
+  }, 1000);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    debouncedLogin(email, password);
   };
 
   return (
@@ -63,8 +74,12 @@ export default function LoginForm() {
             </div>
           </div>
 
-          <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-600/90 text-white">
-            登录
+          <Button 
+            type="submit" 
+            className="w-full bg-indigo-600 hover:bg-indigo-600/90 text-white"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? '登录中...' : '登录'}
           </Button>
 
           <div className="text-center">

@@ -29,7 +29,6 @@ export interface TabGroupProps extends CustomComponentProps {
 
 export interface ErrorBlockProps extends CustomComponentProps {
   code?: string;
-  severity?: 'low' | 'medium' | 'critical';
   description?: string;
   solution?: string;
   reference?: string;

@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Toaster } from '@/components/ui/toaster';
+import { useDebounce } from '@/hooks/use-debounce';
 import { authApi } from '@/services/api/auth';
 import { showToast } from '@/store/toast';
 import React, { useEffect, useState } from 'react';
@@ -31,6 +32,7 @@ export default function RegisterForm() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [countdown, setCountdown] = useState(0);
   const [name, setName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -88,24 +90,23 @@ export default function RegisterForm() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      showToast({
-        title: "密码不匹配",
-        description: "",
-        variant: "destructive",
-      })
-      return;
-    }
+  const debouncedRegister = useDebounce(async (formData: {
+    email: string;
+    password: string;
+    confirm_password: string;
+    verification_code: string;
+    department_id: number;
+    name: string;
+  }) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    
     try {
-      await authApi.register({
-        email,
-        password,
-        confirm_password: confirmPassword,
-        verification_code: verificationCode,
-        department_id: parseInt(departmentId),
-        name,
+      await authApi.register(formData);
+      showToast({
+        title: "注册成功",
+        description: "即将跳转到登录页面",
+        variant: "default",
       });
       setTimeout(() => {
         navigate('/login');
@@ -116,8 +117,31 @@ export default function RegisterForm() {
         title: "注册失败",
         description: "请稍后再试",
         variant: "destructive",
-      })
+      });
+    } finally {
+      setIsSubmitting(false);
     }
+  }, 5000);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      showToast({
+        title: "密码不匹配",
+        description: "",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    debouncedRegister({
+      email,
+      password,
+      confirm_password: confirmPassword,
+      verification_code: verificationCode,
+      department_id: parseInt(departmentId),
+      name,
+    });
   };
 
   return (
@@ -220,8 +244,12 @@ export default function RegisterForm() {
 
           </div>
 
-          <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-600/90 text-white">
-            注册
+          <Button 
+            type="submit" 
+            className="w-full bg-indigo-600 hover:bg-indigo-600/90 text-white"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? '注册中...' : '注册'}
           </Button>
 
           <div className="text-center">
