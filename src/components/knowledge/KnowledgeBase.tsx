@@ -8,6 +8,7 @@ import { useUserInfo } from '@/hooks/use-user-info';
 import type { FileUploadHistory } from '@/services/api/file';
 import { fileApi } from '@/services/api/file';
 import { showToast } from '@/store/toast';
+import { FILE_SIZE_LIMIT, FileUtils } from '@/utils/file';
 import { AlertCircle, FileText, Upload } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { TruncatedFileName } from '../common/TruncatedFileName';
@@ -80,36 +81,26 @@ export default function KnowledgeBase() {
     }
   };
 
-  // 添加文件格式验证函数
-  const validateFileType = (file: File): boolean => {
-    const allowedTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain'
-    ];
-    const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt'];
-    
-    // 检查文件类型
-    if (!allowedTypes.includes(file.type)) {
-      // 如果 type 检查失败，再检查文件扩展名
-      const extension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
-      if (!allowedExtensions.includes(extension)) {
-        return false;
+  // 替换原来的 validateFileType 函数
+  const validateFiles = (files: File[]): string | null => {
+    for (const file of files) {
+      const errorMessage = FileUtils.getErrorMessage(file);
+      if (errorMessage) {
+        return errorMessage;
       }
     }
-    return true;
+    return null;
   };
 
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
 
-    // 验证所有文件格式
-    const invalidFiles = Array.from(files).filter(file => !validateFileType(file));
-    if (invalidFiles.length > 0) {
+    // 验证所有文件
+    const errorMessage = validateFiles(Array.from(files));
+    if (errorMessage) {
       showToast({
-        title: "格式错误",
-        description: "仅支持 PDF、Word、Docx、Txt 格式文件",
+        title: "文件验证失败",
+        description: errorMessage,
         variant: "destructive"
       });
       return;
@@ -256,7 +247,6 @@ export default function KnowledgeBase() {
               }
             </p>
           </div>
-
           <div
             className={`border-2 border-dashed rounded-lg ${
               dragActive
@@ -278,7 +268,10 @@ export default function KnowledgeBase() {
                     <p className="mb-2 text-sm text-muted-foreground">
                       <span className="font-semibold">点击上传</span> 或拖拽文件至此处
                     </p>
-                    <p className="text-xs text-muted-foreground">支持 PDF、Word、Docx、Txt 格式</p>
+                    <div className="text-xs text-muted-foreground space-y-1 text-center">
+                      <p>支持格式：PDF、Word、Docx、Txt</p>
+                      <p>大小限制：{FileUtils.formatFileSize(FILE_SIZE_LIMIT)}</p>
+                    </div>
                   </>
                 )}
               </div>
