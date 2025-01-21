@@ -214,7 +214,7 @@ export function ChatInput({
                   className={`flex-1 min-h-[48px] h-[48px] max-h-[220px] px-3 
                              bg-transparent text-foreground placeholder:text-muted-foreground 
                              focus:outline-none resize-none overflow-x-hidden
-                             leading-[48px] py-0
+                             leading-[1.5] py-3
                              ${isSending ? 'cursor-not-allowed opacity-50' : ''}`}
                   disabled={isSending}
                 />

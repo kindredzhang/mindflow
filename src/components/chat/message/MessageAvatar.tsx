@@ -6,12 +6,12 @@ interface MessageAvatarProps {
 
 export function MessageAvatar({ role }: MessageAvatarProps) {
   return role === 'user' ? (
-    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-      <User size={14} className="text-primary-foreground" />
+    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+      <User size={16} className="text-primary-foreground" />
     </div>
   ) : (
-    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-      <Bot size={14} className="text-primary" />
+    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+      <Bot size={16} className="text-primary" />
     </div>
   );
 } 
