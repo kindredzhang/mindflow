@@ -1,7 +1,8 @@
 import { apiService } from "@/services/api/axios";
 import { showToast } from '@/store/toast';
-import { Message, QuotedMessage } from "@/types";
+import { SendMessageRequest } from "@/types/chat";
 import { handleRequest } from '@/utils/request';
+import { Message } from '@/types/chat';
 
 export interface Session {
   session_id: string;
@@ -21,13 +22,6 @@ export interface Conversation {
   created_at: string;
   updated_at: string;
   knowledgeBase: 'department' | 'enterprise';
-}
-
-export interface SendMessageRequest {
-  question: string;
-  session_id?: string;
-  file?: File;
-  quoted_message?: QuotedMessage;
 }
 
 interface CreateSessionResponse {

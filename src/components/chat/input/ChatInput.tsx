@@ -1,5 +1,5 @@
 import { useDebounce } from '@/hooks/use-debounce';
-import { QuotedMessage } from '@/types';
+import { QuotedMessage } from '@/types/chat';
 import { FileText, Mic, Send, Upload, X } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 

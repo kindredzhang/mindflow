@@ -2,7 +2,7 @@ import { MessageActions } from '@/components/chat/message/MessageActions';
 import { MessageAvatar } from '@/components/chat/message/MessageAvatar';
 import { MessageContent } from '@/components/chat/message/MessageContent';
 import { LoadingDots } from '@/components/common/LoadingDots';
-import type { Message } from '@/types';
+import type { Message } from '@/types/chat';
 import { MessageSquareQuote } from 'lucide-react';
 import { useState } from 'react';
 import { RelatedFiles } from '@/components/chat/message/RelatedFiles';

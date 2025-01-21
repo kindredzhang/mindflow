@@ -19,19 +19,11 @@ import { Input } from "@/components/ui/input";
 import { useDebounce } from '@/hooks/use-debounce';
 import { chatApi } from '@/services/api/chat';
 import { fileApi, FileUploadHistory } from '@/services/api/file';
-import type { Message } from '@/types';
+import type { Message, SendMessageRequest, QuotedMessage } from '@/types/chat';
 import { MessageSquare, Upload } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
-
-interface SendMessageRequest {
-  question: string;
-  chat_history?: Message[];
-  file?: File;
-  session_id?: string;
-  quoted_message?: QuotedMessage;
-}
 
 interface Session {
   session_id: string;
@@ -44,12 +36,6 @@ interface Workspace {
   workspace_title: string;
   workspace_created_at: string;
   sessions: Session[];
-}
-
-interface QuotedMessage {
-  id: string;
-  content: string;
-  role: 'user' | 'assistant';
 }
 
 export default function ChatInterface() {
