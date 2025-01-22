@@ -62,11 +62,11 @@ export function RelatedFiles({ files }: RelatedFilesProps) {
               查看详情
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl">
+          <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
             <DialogHeader>
               <DialogTitle>关联文件详情</DialogTitle>
             </DialogHeader>
-            <Tabs defaultValue={files[0].file_id.toString()} className="w-full">
+            <Tabs defaultValue={files[0].file_id.toString()} className="w-full flex-1 flex flex-col">
               <ScrollArea className="w-full">
                 <TabsList className="w-full justify-start">
                   {files.map(file => (
@@ -87,87 +87,91 @@ export function RelatedFiles({ files }: RelatedFilesProps) {
                 <TabsContent 
                   key={file.file_id} 
                   value={file.file_id.toString()}
-                  className="mt-4"
+                  className="mt-4 flex-1 overflow-hidden"
                 >
-                  <div className="grid grid-cols-[300px,1fr] gap-6">
-                    <div className="space-y-6">
-                      <div className="rounded-lg border bg-card p-4 space-y-4">
-                        <h3 className="font-semibold flex items-center gap-2">
-                          <FileText size={16} />
-                          基本信息
-                        </h3>
-                        <div className="space-y-3 text-sm">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <FileType size={14} />
-                            <span className="w-16">文件类型:</span>
-                            <span className="font-medium text-foreground">{file.file_type}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Calendar size={14} />
-                            <span className="w-16">创建时间:</span>
-                            <span className="font-medium text-foreground">
-                              {new Date(file.created_at).toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="space-y-2">
+                  <div className="grid grid-cols-[300px,1fr] gap-6 h-full">
+                    <ScrollArea className="h-[calc(90vh-180px)]">
+                      <div className="space-y-6 pr-4">
+                        <div className="rounded-lg border bg-card p-4 space-y-4">
+                          <h3 className="font-semibold flex items-center gap-2">
+                            <FileText size={16} />
+                            基本信息
+                          </h3>
+                          <div className="space-y-3 text-sm">
                             <div className="flex items-center gap-2 text-muted-foreground">
-                              <Percent size={14} />
-                              <span className="w-16">相关度:</span>
-                              <div className="flex-1 flex items-center gap-2">
-                                <div className="flex-1 relative h-2 bg-secondary/30 rounded-full overflow-hidden">
-                                  <div 
-                                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary/40 to-primary transition-all duration-500 ease-out"
-                                    style={{ 
-                                      width: `${Math.max(file.similarity * 100, 50)}%`,
-                                      opacity: file.similarity > 0 ? 1 : 0.5
-                                    }}
-                                  />
-                                  <div 
-                                    className="absolute top-0 left-0 h-full bg-primary/20 transition-all duration-500"
-                                    style={{ width: '50%' }}
-                                  />
+                              <FileType size={14} />
+                              <span className="w-16">文件类型:</span>
+                              <span className="font-medium text-foreground">{file.file_type}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Calendar size={14} />
+                              <span className="w-16">创建时间:</span>
+                              <span className="font-medium text-foreground">
+                                {new Date(file.created_at).toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-muted-foreground">
+                                <Percent size={14} />
+                                <span className="w-16">相关度:</span>
+                                <div className="flex-1 flex items-center gap-2">
+                                  <div className="flex-1 relative h-2 bg-secondary/30 rounded-full overflow-hidden">
+                                    <div 
+                                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary/40 to-primary transition-all duration-500 ease-out"
+                                      style={{ 
+                                        width: `${Math.max(file.similarity * 100, 50)}%`,
+                                        opacity: file.similarity > 0 ? 1 : 0.5
+                                      }}
+                                    />
+                                    <div 
+                                      className="absolute top-0 left-0 h-full bg-primary/20 transition-all duration-500"
+                                      style={{ width: '50%' }}
+                                    />
+                                  </div>
+                                  <Badge variant="secondary" className="shrink-0">
+                                    {(file.similarity * 100).toFixed(2)}%
+                                  </Badge>
                                 </div>
-                                <Badge variant="secondary" className="shrink-0">
-                                  {(file.similarity * 100).toFixed(2)}%
-                                </Badge>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="rounded-lg border bg-card p-4 space-y-4">
-                        <h3 className="font-semibold flex items-center gap-2">
-                          <ExternalLink size={16} />
-                          来源信息
-                        </h3>
-                        <div className="text-sm text-muted-foreground">
-                          <p>来源类型: {formatSourceType(file.source_type)}</p>
+                        <div className="rounded-lg border bg-card p-4 space-y-4">
+                          <h3 className="font-semibold flex items-center gap-2">
+                            <ExternalLink size={16} />
+                            来源信息
+                          </h3>
+                          <div className="text-sm text-muted-foreground">
+                            <p>来源类型: {formatSourceType(file.source_type)}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </ScrollArea>
 
-                    <div className="rounded-lg border bg-card">
-                      <div className="p-4 border-b">
+                    <div className="rounded-lg border bg-card flex flex-col h-[calc(90vh-180px)]">
+                      <div className="p-4 border-b shrink-0">
                         <h3 className="font-semibold">文件预览</h3>
                       </div>
-                      <div className="p-4 min-h-[500px] overflow-auto">
-                        {file.file_type.toLowerCase().includes('image') ? (
-                          <img 
-                            src={file.file_contents} 
-                            alt={file.file_name}
-                            className="max-w-full h-auto"
-                          />
-                        ) : file.file_type.toLowerCase().includes('pdf') ? (
-                          <div className="text-muted-foreground">
-                            PDF预览暂不支持
-                          </div>
-                        ) : (
-                          <pre className="whitespace-pre-wrap break-words text-sm">
-                            {file.file_contents}
-                          </pre>
-                        )}
-                      </div>
+                      <ScrollArea className="flex-1 rounded-b-lg">
+                        <div className="p-4 h-full">
+                          {file.file_type.toLowerCase().includes('image') ? (
+                            <img 
+                              src={file.file_contents} 
+                              alt={file.file_name}
+                              className="max-w-full h-auto rounded-md"
+                            />
+                          ) : file.file_type.toLowerCase().includes('pdf') ? (
+                            <div className="text-muted-foreground">
+                              PDF预览暂不支持
+                            </div>
+                          ) : (
+                            <pre className="whitespace-pre-wrap break-all text-sm font-mono bg-muted p-4 rounded-md h-full min-h-[calc(90vh-280px)]">
+                              {file.file_contents}
+                            </pre>
+                          )}
+                        </div>
+                      </ScrollArea>
                     </div>
                   </div>
                 </TabsContent>
