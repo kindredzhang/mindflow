@@ -2,12 +2,12 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import type { FileUploadHistory } from '@/services/api/file';
 import { FileText } from 'lucide-react';
 
-interface RecentFilesProps {
+interface WorkspaceRelatedFilesProps {
   files: FileUploadHistory[];
   loading?: boolean;
 }
 
-export function RecentFiles({ files, loading }: RecentFilesProps) {
+export function WorkspaceRelatedFiles({ files, loading }: WorkspaceRelatedFilesProps) {
   if (!files.length && !loading) return null;
 
   return (

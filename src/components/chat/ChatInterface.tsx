@@ -1,27 +1,16 @@
-import { WelcomeScreen } from '@/components/chat/WelcomeScreen';
+import { WelcomeScreen } from '@/components/welcome/WelcomeScreen';
 import { ChatInput } from '@/components/chat/input/ChatInput';
 import { ChatMessage } from '@/components/chat/message/ChatMessage';
-import WelcomeChatScreen from '@/components/chat/welcome/WelcomeChatScreeen';
-import { RecentFiles } from '@/components/chat/workspace/RecentFiles';
+import WelcomeChatScreen from '@/components/welcome/WelcomeChatScreeen';
+import { WorkspaceRelatedFiles } from '@/components/chat/workspace/WorkspaceRelatedFiles';
+import { WorkspaceHeader } from '@/components/chat/workspace/WorkspaceHeader';
 import WorkspaceList from '@/components/chat/workspace/WorkspaceList';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ResizablePanel } from '@/components/common/ResizablePanel';
 import Navigation from '@/components/layout/Navigation';
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { useDebounce } from '@/hooks/use-debounce';
 import { chatApi } from '@/services/api/chat';
 import { fileApi, FileUploadHistory } from '@/services/api/file';
-import type { Message, SendMessageRequest, QuotedMessage } from '@/types/chat';
-import { MessageSquare, Upload } from 'lucide-react';
+import type { Message, QuotedMessage, SendMessageRequest } from '@/types/chat';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -49,8 +38,6 @@ export default function ChatInterface() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
-  const [isNewWorkspaceDialogOpen, setIsNewWorkspaceDialogOpen] = useState(false);
-  const [newWorkspaceName, setNewWorkspaceName] = useState('');
   const [recentFiles, setRecentFiles] = useState<FileUploadHistory[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [quotedMessage, setQuotedMessage] = useState<QuotedMessage | null>(null);
@@ -103,10 +90,6 @@ export default function ChatInterface() {
       });
     }
   }, [location.state, navigate]);
-
-  const handleNewChat = () => {
-    setIsNewWorkspaceDialogOpen(true);
-  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -353,22 +336,14 @@ export default function ChatInterface() {
     }
   };
 
-  const debouncedCreateWorkspace = useDebounce(async (workspaceName: string) => {
+  const handleCreateWorkspace = async (workspaceName: string) => {
     try {
       await chatApi.createWorkspace(workspaceName);
       await fetchWorkspaces();
-      setNewWorkspaceName('');
-      setIsNewWorkspaceDialogOpen(false);
     } catch (error) {
       console.error('Failed to create workspace:', error);
       toast.error('创建工作区失败');
     }
-  }, 500);
-
-  const handleCreateWorkspace = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newWorkspaceName.trim()) return;
-    debouncedCreateWorkspace(newWorkspaceName);
   };
 
   const handleCreateSession = async (workspaceId: string) => {
@@ -469,64 +444,7 @@ export default function ChatInterface() {
         {/* Sidebar */}
         <ResizablePanel className="bg-card border-r border-[#2a2a2a]">
           <div className="h-full flex flex-col">
-            <div className="p-4 space-y-3">
-              <Dialog open={isNewWorkspaceDialogOpen} onOpenChange={setIsNewWorkspaceDialogOpen}>
-                <DialogTrigger asChild>
-                  <button
-                    onClick={handleNewChat}
-                    aria-label="新建工作区"
-                    className="w-full flex items-center justify-center space-x-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-md"
-                  >
-                    <MessageSquare size={16} />
-                    <span>新建工作区</span>
-                  </button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>新建工作区</DialogTitle>
-                    <DialogDescription>
-                      创建一个新的工作区来组织你的对话
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleCreateWorkspace} className="space-y-4">
-                    <div className="space-y-2">
-                      <label htmlFor="workspace-name" className="text-sm font-medium">
-                        工作区名称
-                      </label>
-                      <Input
-                        id="workspace-name"
-                        value={newWorkspaceName}
-                        onChange={(e) => setNewWorkspaceName(e.target.value)}
-                        placeholder="请输入工作区名称" 
-                        className="w-full"
-                        autoComplete="off"
-                        maxLength={20}
-                      />
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setIsNewWorkspaceDialogOpen(false)}
-                      >
-                        取消
-                      </Button>
-                      <Button type="submit" className="bg-indigo-600 text-white hover:bg-indigo-600/90">
-                        创建
-                      </Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-
-              <button
-                onClick={() => navigate('/knowledge')} 
-                className="w-full flex items-center justify-center space-x-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-md"
-              >
-                <Upload size={16} />
-                <span>上传文档</span>
-              </button>
-            </div>
+            <WorkspaceHeader onCreateWorkspace={handleCreateWorkspace} />
 
             <div className="flex-1 overflow-y-auto px-4 custom-scrollbar">
               <div className="mb-4">
@@ -543,7 +461,7 @@ export default function ChatInterface() {
               </div>
             </div>
 
-            <RecentFiles 
+            <WorkspaceRelatedFiles 
               files={recentFiles} 
               loading={loadingRecentFiles}
             />
