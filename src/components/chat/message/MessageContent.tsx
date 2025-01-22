@@ -1,4 +1,5 @@
 import { CopyButton } from '@/components/common/CopyButton';
+import 'katex/dist/katex.min.css';
 import type { Components } from 'react-markdown';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -47,6 +48,7 @@ export function MessageContent({ content }: MessageContentProps) {
                 style={oneDark}
                 PreTag="div"
                 className="text-sm rounded-md"
+                showLineNumbers={true}
               >
                 {String(children).replace(/\n$/, '')}
               </SyntaxHighlighter>
@@ -106,7 +108,7 @@ export function MessageContent({ content }: MessageContentProps) {
     // 保留表格样式
     table: ({ children }: { children: React.ReactNode }) => (
       <div className="overflow-x-auto my-3">
-        <table className="min-w-full divide-y divide-border">
+        <table className="min-w-full divide-y divide-border border border-border rounded-md">
           {children}
         </table>
       </div>
@@ -124,16 +126,14 @@ export function MessageContent({ content }: MessageContentProps) {
   };
 
   return (
-    <>
-      <div className="prose prose-sm max-w-full overflow-hidden">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm, remarkMath]}
-          rehypePlugins={[rehypeKatex]}
-          components={components}
-        >
-          {content}
-        </ReactMarkdown>
-      </div>
-    </>
+    <div className="prose prose-sm max-w-full overflow-hidden prose-pre:my-0 prose-p:my-0 prose-headings:my-0">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+        components={components}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
   );
 } 

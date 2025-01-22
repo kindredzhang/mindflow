@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -483,6 +484,9 @@ export default function ChatInterface() {
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>新建工作区</DialogTitle>
+                    <DialogDescription>
+                      创建一个新的工作区来组织你的对话
+                    </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleCreateWorkspace} className="space-y-4">
                     <div className="space-y-2">
